@@ -34,13 +34,13 @@ public record FileUploadRequest
 public record UrlUploadRequest
 {
     public string? UserHash { get; init; }
-    public required IEnumerable<Uri> Files { get; init; }
+    public required IEnumerable<Uri?> Files { get; init; }
 }
 
 public record DeleteFileRequest
 {
     public required string UserHash { get; init; }
-    public required IEnumerable<string> FileNames { get; init; }
+    public required IEnumerable<string?> FileNames { get; init; }
 }
 
 public record AlbumRequest
@@ -48,11 +48,16 @@ public record AlbumRequest
     public CatBoxRequestTypes Request { get; init; }
     public string? UserHash { get; init; }
     public string? AlbumId { get; init; }
-    public required IEnumerable<FileInfo> Files { get; init; }
+    public required IEnumerable<FileInfo?> Files { get; init; }
 }
 
 internal static class CatBoxRequestStrings
 {
+    public const string RequestType = "reqtype";
+    public const string UserHashType = "userhash";
+    public const string UrlType = "url";
+    public const string FileType = "files";
+    
     private static string UploadFile => "fileupload";
     private static string UrlUpload => "urlupload";
     private static string DeleteFile => "deletefiles";
