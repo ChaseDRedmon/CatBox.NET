@@ -2,6 +2,6 @@
 
 public record CatBoxConfig
 {
-    public Uri CatBoxUrl { get; init; }
-    public Uri LitterboxUrl { get; init; }
+    public Uri CatBoxUrl { get; set; }
+    public Uri LitterboxUrl { get; set; }
 }
