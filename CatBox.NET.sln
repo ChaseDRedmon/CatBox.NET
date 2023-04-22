@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatBox.NET", "src\CatBox.NET\CatBox.NET.csproj", "{CDEF8297-E053-495F-960C-F3EBAEA7E71F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "src\SampleApp\SampleApp.csproj", "{3AFA15C7-609B-4803-85F2-027318AF286C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A35832E5-E239-4054-877E-29330AE7C812}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{AB289F82-15F6-4CF8-8738-A760026CCC7D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CDEF8297-E053-495F-960C-F3EBAEA7E71F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDEF8297-E053-495F-960C-F3EBAEA7E71F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDEF8297-E053-495F-960C-F3EBAEA7E71F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDEF8297-E053-495F-960C-F3EBAEA7E71F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AFA15C7-609B-4803-85F2-027318AF286C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AFA15C7-609B-4803-85F2-027318AF286C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AFA15C7-609B-4803-85F2-027318AF286C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AFA15C7-609B-4803-85F2-027318AF286C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CDEF8297-E053-495F-960C-F3EBAEA7E71F} = {A35832E5-E239-4054-877E-29330AE7C812}
+		{3AFA15C7-609B-4803-85F2-027318AF286C} = {A35832E5-E239-4054-877E-29330AE7C812}
+	EndGlobalSection
+EndGlobal
