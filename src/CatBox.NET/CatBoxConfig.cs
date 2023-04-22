@@ -1,6 +1,7 @@
 ﻿namespace CatBox.NET;
 
-public class CatBoxConfig
+public record CatBoxConfig
 {
-    public Uri CatBoxUrl { get; set; }
+    public Uri CatBoxUrl { get; init; }
+    public Uri LitterboxUrl { get; init; }
 }

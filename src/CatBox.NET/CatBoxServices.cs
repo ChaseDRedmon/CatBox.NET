@@ -9,6 +9,7 @@ public static class CatBoxServices
         services
             .Configure(setupAction)
             .AddScoped<ICatBox, Catbox>()
+            .AddScoped<ILitterboxClient, LitterboxClient>()
             .AddScoped<ICatBoxClient, CatBoxClient>()
             .AddHttpClient<ICatBoxClient, CatBoxClient>();
 
