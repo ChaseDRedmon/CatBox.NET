@@ -12,6 +12,8 @@
         <RepositoryUrl>https://github.com/ChaseDRedmon/CatBox.NET</RepositoryUrl>
         <RepositoryType>Library</RepositoryType>
         <PackageTags>Catbox, Catbox.moe, Imgur</PackageTags>
+        <Copyright>Copyright © 2023 Chase Redmon</Copyright>
+        <PackageLicenseUrl>https://github.com/ChaseDRedmon/CatBox.NET/blob/main/license.txt</PackageLicenseUrl>
     </PropertyGroup>
 
     <ItemGroup>
