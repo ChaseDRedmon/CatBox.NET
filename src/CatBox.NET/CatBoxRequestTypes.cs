@@ -81,7 +81,7 @@ public record StreamUploadRequest
 public record UrlUploadRequest
 {
     public string? UserHash { get; init; }
-    public required IEnumerable<Uri?> Files { get; init; }
+    public required IEnumerable<Uri> Files { get; init; }
 }
 
 /// <summary>
@@ -90,7 +90,7 @@ public record UrlUploadRequest
 public record DeleteFileRequest
 {
     public required string UserHash { get; init; }
-    public required IEnumerable<string?> FileNames { get; init; }
+    public required IEnumerable<string> FileNames { get; init; }
 }
 
 /// <summary>
@@ -98,10 +98,10 @@ public record DeleteFileRequest
 /// </summary>
 public record AlbumRequest
 {
-    public CatBoxRequestTypes Request { get; init; }
-    public string? UserHash { get; init; }
-    public string? AlbumId { get; init; }
-    public required IEnumerable<string?> Files { get; init; }
+    public required CatBoxRequestTypes Request { get; init; }
+    public required string UserHash { get; init; }
+    public required string AlbumId { get; init; }
+    public required IEnumerable<string> Files { get; init; }
 }
 
 /// <summary>
@@ -109,11 +109,11 @@ public record AlbumRequest
 /// </summary>
 public record EditAlbumRequest
 {
-    public string? UserHash { get; init; }
-    public required string? AlbumId { get; init; }
-    public required string? Title { get; init; }
-    public required string? Description { get; init; }
-    public required IEnumerable<string?> Files { get; init; }
+    public required string UserHash { get; init; }
+    public required string AlbumId { get; init; }
+    public required string Title { get; init; }
+    public required string Description { get; init; }
+    public required IEnumerable<string> Files { get; init; }
 }
 
 /// <summary>
@@ -122,8 +122,8 @@ public record EditAlbumRequest
 public record CreateAlbumRequest
 {
     public string? UserHash { get; init; }
-    public required string? Title { get; init; }
-    public required string? Description { get; init; }
+    public required string Title { get; init; }
+    public required string Description { get; init; }
     public required IEnumerable<string> Files { get; init; }
 }
 
@@ -181,6 +181,12 @@ internal static class CatBoxRequestStrings
     private static string RemoveFromAlbum => "removefromalbum";
     private static string DeleteFromAlbum => "deletealbum";
     
+    /// <summary>
+    /// Converts a <see cref="CatBoxRequestTypes"/> to the CatBox.moe equivalent API parameter string
+    /// </summary>
+    /// <param name="requestTypes">A request type</param>
+    /// <returns>CatBox API Request String</returns>
+    /// <exception cref="ArgumentOutOfRangeException"> when an invalid request type is chosen</exception>
     public static string ToRequest(this CatBoxRequestTypes requestTypes) =>
         requestTypes switch
         {
