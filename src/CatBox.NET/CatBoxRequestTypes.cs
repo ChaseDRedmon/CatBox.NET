@@ -123,7 +123,7 @@ public record CreateAlbumRequest
 {
     public string? UserHash { get; init; }
     public required string Title { get; init; }
-    public required string Description { get; init; }
+    public string? Description { get; init; }
     public required IEnumerable<string> Files { get; init; }
 }
 

@@ -254,7 +254,10 @@ public class CatBoxClient : ICatBoxClient
             content.Add(new StringContent(createAlbumRequest.UserHash), CatBoxRequestStrings.UserHashType);
 
         content.Add(new StringContent(createAlbumRequest.Title), CatBoxRequestStrings.TitleType);
-        content.Add(new StringContent(createAlbumRequest.Description), CatBoxRequestStrings.DescriptionType);
+        
+        if (!string.IsNullOrWhiteSpace(createAlbumRequest.Description))
+            content.Add(new StringContent(createAlbumRequest.Description), CatBoxRequestStrings.DescriptionType);
+        
         content.Add(new StringContent(fileNames), CatBoxRequestStrings.FileType);
         request.Content = content;
 
