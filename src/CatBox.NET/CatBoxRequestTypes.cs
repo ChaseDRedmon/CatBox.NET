@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+namespace CatBox.NET;
 
 /// <summary>
 /// Currently unused
@@ -124,7 +124,7 @@ public record CreateAlbumRequest
     public string? UserHash { get; init; }
     public required string? Title { get; init; }
     public required string? Description { get; init; }
-    public required IEnumerable<string?> Files { get; init; }
+    public required IEnumerable<string> Files { get; init; }
 }
 
 /// <summary>
