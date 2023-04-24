@@ -56,6 +56,33 @@ public enum CatBoxRequestTypes
 }
 
 /// <summary>
+/// Image expiry in litterbox.moe
+/// </summary>
+public enum ExpireAfter
+{
+    
+    /// <summary>
+    /// Expire after 1 hour
+    /// </summary>
+    OneHour,
+    
+    /// <summary>
+    /// Expire after 12 hours
+    /// </summary>
+    TwelveHours,
+    
+    /// <summary>
+    /// Expire after one day (24 hours)
+    /// </summary>
+    OneDay,
+    
+    /// <summary>
+    /// Expire after three days (72 hours)
+    /// </summary>
+    ThreeDays
+}
+
+/// <summary>
 /// Wraps multiple files to upload to the API
 /// </summary>
 public record FileUploadRequest
@@ -65,12 +92,30 @@ public record FileUploadRequest
 }
 
 /// <summary>
+/// 
+/// </summary>
+public record TemporaryFileUploadRequest
+{
+    public required ExpireAfter ExpireAfter { get; init; }
+    public required IEnumerable<FileInfo> Files { get; init; }
+}
+
+/// <summary>
 /// Wraps a network stream to stream content to the API
 /// </summary>
 public record StreamUploadRequest
 {
     public string? UserHash { get; init; }
-    
+    public required string FileName { get; init; }
+    public required Stream Stream { get; init; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public record TemporaryStreamUploadRequest
+{
+    public required ExpireAfter ExpireAfter { get; init; }
     public required string FileName { get; init; }
     public required Stream Stream { get; init; }
 }
@@ -171,6 +216,8 @@ internal static class CatBoxRequestStrings
     /// Album Id API Argument in MultiPartForm
     /// </summary>
     public const string AlbumIdShortType = "short";
+
+    public const string ExpiryType = "time";
     
     private static string UploadFile => "fileupload";
     private static string UrlUpload => "urlupload";
@@ -200,4 +247,43 @@ internal static class CatBoxRequestStrings
             CatBoxRequestTypes.DeleteAlbum => DeleteFromAlbum,
             _ => throw new ArgumentOutOfRangeException(nameof(requestTypes), requestTypes, null)
         };
+    
+    /// <summary>
+    /// Converts a <see cref="ExpireAfter"/> value to the Litterbox.moe API equivalent time string
+    /// </summary>
+    /// <param name="expiry">Amount of time before an image expires and is deleted</param>
+    /// <returns>Litterbox API Time Equivalent parameter value</returns>
+    /// <exception cref="ArgumentOutOfRangeException"> when an invalid expiry value is chosen</exception>
+    public static string ToRequest(this ExpireAfter expiry) =>
+        expiry switch
+        {
+            ExpireAfter.OneHour => "1h",
+            ExpireAfter.TwelveHours => "12h",
+            ExpireAfter.OneDay => "24h",
+            ExpireAfter.ThreeDays => "72h",
+            _ => throw new ArgumentOutOfRangeException(nameof(expiry), expiry, null)
+        };
+}
+
+internal static class Common
+{
+    /// <summary>
+    /// These file extensions are not allowed by the API, so filter them out
+    /// </summary>
+    /// <param name="extension"></param>
+    /// <returns></returns>
+    public static bool IsFileExtensionValid(string extension)
+    {
+        switch (extension)
+        {
+            case ".exe":
+            case ".scr":
+            case ".cpl":
+            case var _ when extension.Contains(".doc"):
+            case ".jar":
+                return false;
+            default:
+                return true;
+        }
+    }
 }

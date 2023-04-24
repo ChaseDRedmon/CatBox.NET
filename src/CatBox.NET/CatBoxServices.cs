@@ -17,7 +17,10 @@ public static class CatBoxServices
             .AddScoped<ICatBox, Catbox>()
             .AddScoped<ILitterboxClient, LitterboxClient>()
             .AddScoped<ICatBoxClient, CatBoxClient>()
+            .AddScoped<ILitterboxClient, LitterboxClient>()
             .AddHttpClient<ICatBoxClient, CatBoxClient>();
+
+        services.AddHttpClient<ILitterboxClient, LitterboxClient>();
 
         return services;
     }

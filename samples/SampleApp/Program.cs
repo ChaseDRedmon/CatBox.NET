@@ -14,6 +14,7 @@ var collection = new ServiceCollection()
     .AddLogging(f => f.AddSerilog(dispose: true))
     .BuildServiceProvider();
 
+// Upload a single image
 using (var scope = collection.CreateScope())
 {
     var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();
@@ -26,6 +27,7 @@ using (var scope = collection.CreateScope())
     Console.WriteLine(response);
 }
 
+// Create an album of images already on Catbox
 using (var scope = collection.CreateScope())
 {
     var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();

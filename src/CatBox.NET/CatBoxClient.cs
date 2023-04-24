@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Options;
+using static CatBox.NET.Common;
 
 namespace CatBox.NET;
 
@@ -117,11 +118,11 @@ public class CatBoxClient : ICatBoxClient
         if (fileUploadRequest is null)
             throw new ArgumentNullException(nameof(fileUploadRequest), "Argument cannot be null");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
-        using var content = new MultipartFormDataContent();
-
         foreach (var imageFile in fileUploadRequest.Files.Where(static f => IsFileExtensionValid(f.Extension)))
         {
+            using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+            using var content = new MultipartFormDataContent();
+            
             await using var fileStream = File.OpenRead(imageFile.FullName);
             content.Add(new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType);
 
@@ -137,7 +138,8 @@ public class CatBoxClient : ICatBoxClient
             yield return await response.Content.ReadAsStringAsync();
         }
     }
-
+    
+    /// <inheritdoc/>
     public async Task<string?> UploadImage(StreamUploadRequest fileUploadRequest, CancellationToken ct = default)
     {
         if (fileUploadRequest is null)
@@ -218,7 +220,8 @@ public class CatBoxClient : ICatBoxClient
 
         return await response.Content.ReadAsStringAsync();
     }
-
+    
+    /// <inheritdoc/>
     public async Task<string?> CreateAlbum(CreateAlbumRequest createAlbumRequest, CancellationToken ct = default)
     {
         if (createAlbumRequest is null)
@@ -266,7 +269,8 @@ public class CatBoxClient : ICatBoxClient
 
         return await response.Content.ReadAsStringAsync();
     }
-
+    
+    /// <inheritdoc/>
     public async Task<string?> EditAlbum(EditAlbumRequest editAlbumRequest, CancellationToken ct = default)
     {
         if (editAlbumRequest is null)
@@ -308,7 +312,8 @@ public class CatBoxClient : ICatBoxClient
 
         return await response.Content.ReadAsStringAsync();
     }
-
+    
+    /// <inheritdoc/>
     public async Task<string?> ModifyAlbum(AlbumRequest albumRequest, CancellationToken ct = default)
     {
         if (albumRequest is null)
@@ -374,26 +379,6 @@ public class CatBoxClient : ICatBoxClient
             case CatBoxRequestTypes.DeleteFile:
             default:
                 return false;
-        }
-    }
-
-    /// <summary>
-    /// These file extensions are not allowed by the API, so filter them out
-    /// </summary>
-    /// <param name="extension"></param>
-    /// <returns></returns>
-    private static bool IsFileExtensionValid(string extension)
-    {
-        switch (extension)
-        {
-            case ".exe":
-            case ".scr":
-            case ".cpl":
-            case var _ when extension.Contains(".doc"):
-            case ".jar":
-                return false;
-            default:
-                return true;
         }
     }
 }
