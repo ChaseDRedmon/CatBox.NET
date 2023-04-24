@@ -41,4 +41,18 @@ using (var scope = collection.CreateScope())
     Console.WriteLine(response);
 }
 
+// Temporarily upload an image to litterbox
+using (var scope = collection.CreateScope())
+{
+    var client = scope.ServiceProvider.GetRequiredService<ILitterboxClient>();
+    var response = await client.UploadImage(new TemporaryStreamUploadRequest
+    {
+        ExpireAfter = ExpireAfter.OneHour,
+        FileName = Path.GetFileName(@"C:\Users\redmo\Documents\Anime\13c9a4.png"),
+        Stream = File.OpenRead(@"C:\Users\redmo\Documents\Anime\13c9a4.png")
+    });
+
+    Console.WriteLine(response);
+}
+
 Console.ReadLine();
