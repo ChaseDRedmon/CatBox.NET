@@ -1,17 +1,7 @@
 ﻿namespace CatBox.NET;
 
-public interface ICatBox
-{
-    public Task UploadFile();
-    public Task DeleteFile();
-    public Task CreateAlbum();
-    public Task EditAlbum();
-    public Task AddToAlbum();
-    public Task RemoveFromAlbum();
-    public Task DeleteAlbum();
-}
-
-public class Catbox : ICatBox
+[Obsolete("Do not use at this time")]
+public sealed class Catbox : ICatBox
 {
     private readonly ICatBoxClient _client;
 

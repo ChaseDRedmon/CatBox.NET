@@ -4,39 +4,16 @@ using static CatBox.NET.Common;
 
 namespace CatBox.NET;
 
-public interface ILitterboxClient
-{
-    /// <summary>
-    /// Enables uploading multiple files from disk (FileStream) to the API
-    /// </summary>
-    /// <param name="temporaryFileUploadRequest"></param>
-    /// <param name="ct">Cancellation Token</param>
-    /// <exception cref="ArgumentNullException">When <see cref="FileUploadRequest"/> is null</exception>
-    /// <returns>Response string from the API</returns>
-    IAsyncEnumerable<string?> UploadMultipleImages(TemporaryFileUploadRequest temporaryFileUploadRequest, CancellationToken ct = default);
-
-    /// <summary>
-    /// Streams a single image to be uploaded
-    /// </summary>
-    /// <param name="temporaryStreamUploadRequest"></param>
-    /// <param name="ct">Cancellation Token</param>
-    /// <exception cref="ArgumentNullException">When <see cref="StreamUploadRequest"/> is null</exception>
-    /// <exception cref="ArgumentNullException">When <see cref="StreamUploadRequest.FileName"/> is null</exception>
-    /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
-    /// <returns>Response string from the API</returns>
-    Task<string?> UploadImage(TemporaryStreamUploadRequest temporaryStreamUploadRequest, CancellationToken ct = default);
-}
-
 public class LitterboxClient : ILitterboxClient
 {
     private readonly HttpClient _client;
     private readonly CatBoxConfig _config;
 
     /// <summary>
-    /// 
+    /// Creates a new <see cref="LitterboxClient"/>
     /// </summary>
-    /// <param name="client"></param>
-    /// <param name="config"></param>
+    /// <param name="client"><see cref="HttpClient"/></param>
+    /// <param name="config"><see cref="IOptions{TOptions}"/></param>
     /// <exception cref="ArgumentNullException"></exception>
     public LitterboxClient(HttpClient client, IOptions<CatBoxConfig> config)
     {
@@ -66,9 +43,7 @@ public class LitterboxClient : ILitterboxClient
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            // response.EnsureSuccessStatusCode();
-
-            yield return await response.Content.ReadAsStringAsync();
+            yield return await response.Content.ReadAsStringAsync(ct);
         }
     }
     
@@ -82,16 +57,15 @@ public class LitterboxClient : ILitterboxClient
             throw new ArgumentNullException(nameof(temporaryStreamUploadRequest.FileName), "Argument cannot be null");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.LitterboxUrl);
-        using var content = new MultipartFormDataContent();
-
-        content.Add(new StringContent(temporaryStreamUploadRequest.ExpireAfter.ToRequest()), CatBoxRequestStrings.ExpiryType);
-        content.Add(new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType);
-        content.Add(new StreamContent(temporaryStreamUploadRequest.Stream), CatBoxRequestStrings.FileToUploadType, temporaryStreamUploadRequest.FileName);
+        using var content = new MultipartFormDataContent
+        {
+            { new StringContent(temporaryStreamUploadRequest.ExpireAfter.ToRequest()), CatBoxRequestStrings.ExpiryType },
+            { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType },
+            { new StreamContent(temporaryStreamUploadRequest.Stream), CatBoxRequestStrings.FileToUploadType, temporaryStreamUploadRequest.FileName }
+        };
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        // response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadAsStringAsync();
+        return await response.Content.ReadAsStringAsync(ct);
     }
 }

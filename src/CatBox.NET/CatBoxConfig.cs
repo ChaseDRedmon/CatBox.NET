@@ -8,10 +8,10 @@ public record CatBoxConfig
     /// <summary>
     /// URL for the catbox.moe domain
     /// </summary>
-    public Uri CatBoxUrl { get; set; }
+    public Uri? CatBoxUrl { get; set; }
     
     /// <summary>
     /// URL for the litterbox.moe domain
     /// </summary>
-    public Uri LitterboxUrl { get; set; }
+    public Uri? LitterboxUrl { get; set; }
 }
