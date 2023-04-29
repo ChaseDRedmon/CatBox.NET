@@ -1,11 +1,11 @@
-using CatBox.NET;
+﻿using CatBox.NET;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace CatBox.Tests.Unit;
+namespace CatBox.Tests.Unit.Requests;
 
-public class CatBoxClientTests
+public class UploadImageMultipleTests
 {
     private readonly Uri CatBoxUrl = new("https://catbox.moe/user/api.php");
     private readonly Uri LitterboxUrl = new("https://litterbox.catbox.moe/resources/internals/api.php");
@@ -13,14 +13,14 @@ public class CatBoxClientTests
     private readonly CatBoxClient _sut;
     private readonly HttpClient _httpClient = new Mock<HttpClient>().Object;
 
-    public CatBoxClientTests()
+    public UploadImageMultipleTests()
     {
-        var config = GetCatBoxConfig(CatBoxUrl, LitterboxUrl);
+        var config = Helper.GetCatBoxConfig(CatBoxUrl, LitterboxUrl);
         _sut = new CatBoxClient(_httpClient, config);
     }
     
     [Fact]
-    public void UploadImagesMultiple_ShouldThrowArgumentNullException_WhenFileUploadRequestIsNull()
+    public void UploadImagesMultiple_ShouldThrowArgumentNullException_When_FileUploadRequest_IsNull()
     {
         // Arrange
         FileUploadRequest fileUploadRequest = null;
@@ -31,15 +31,6 @@ public class CatBoxClientTests
         // Assert
         fileUrls.Enumerating(x => x.ToEnumerable().First()).Should().Throw<ArgumentNullException>();
     }
-
-    private static IOptions<CatBoxConfig> GetCatBoxConfig(Uri catboxUrl, Uri litterboxUrl)
-    {
-        return Options.Create(
-            new CatBoxConfig
-            {
-                CatBoxUrl = catboxUrl,
-                LitterboxUrl = litterboxUrl
-            }
-        );
-    }
+    
+    
 }
