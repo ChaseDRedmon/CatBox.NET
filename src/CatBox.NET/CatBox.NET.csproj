@@ -5,8 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>11</LangVersion>
-        <Version>0.2.0</Version>
-        <Authors>Chase Redmon, Kuinox</Authors>
+        <Version>0.3.0</Version>
+        <Authors>Chase Redmon, Kuinox, Adam Sears</Authors>
         <Description>CatBox.NET is a .NET Library for uploading files, URLs, and modifying albums on CatBox.moe</Description>
         <PackageProjectUrl>https://github.com/ChaseDRedmon/CatBox.NET</PackageProjectUrl>
         <RepositoryUrl>https://github.com/ChaseDRedmon/CatBox.NET</RepositoryUrl>
