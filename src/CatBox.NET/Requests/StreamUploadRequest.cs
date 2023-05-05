@@ -1,15 +1,10 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Requests;
 
 /// <summary>
-/// A temporary request for an individual file upload
+/// Wraps a network stream to stream content to the API
 /// </summary>
-public record TemporaryStreamUploadRequest
+public record StreamUploadRequest : UploadRequest
 {
-    /// <summary>
-    /// When the image should be expired
-    /// </summary>
-    public required ExpireAfter Expiry { get; init; }
-
     /// <summary>
     /// The name of the file
     /// </summary>

@@ -1,8 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
+using CatBox.NET.Enums;
+using CatBox.NET.Requests;
 using Microsoft.Extensions.Options;
-using static CatBox.NET.Common;
+using static CatBox.NET.Client.Common;
 
-namespace CatBox.NET;
+namespace CatBox.NET.Client;
 
 public class CatBoxClient : ICatBoxClient
 {

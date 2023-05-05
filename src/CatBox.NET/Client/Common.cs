@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Client;
 
 internal static class Common
 {

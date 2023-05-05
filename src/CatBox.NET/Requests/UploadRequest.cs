@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Requests;
 
 /// <summary>
 /// A base record for all file upload requests where the UserHash is optional

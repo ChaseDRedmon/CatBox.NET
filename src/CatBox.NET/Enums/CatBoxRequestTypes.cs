@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Enums;
 
 /// <summary>
 /// Types used for CatBox

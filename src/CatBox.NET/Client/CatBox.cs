@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Client;
 
 [Obsolete("Do not use at this time")]
 public sealed class Catbox : ICatBox

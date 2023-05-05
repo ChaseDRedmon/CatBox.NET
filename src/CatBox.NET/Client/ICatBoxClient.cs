@@ -1,4 +1,6 @@
-﻿namespace CatBox.NET;
+﻿using CatBox.NET.Requests;
+
+namespace CatBox.NET.Client;
 
 public interface ICatBoxClient
 {

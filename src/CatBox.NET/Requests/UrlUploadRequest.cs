@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Requests;
 
 /// <summary>
 /// Wraps multiple URLs to upload to the API

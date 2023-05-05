@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CatBox.NET.Client;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CatBox.NET;
 

@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Enums;
 
 /// <summary>
 /// Image expiry in litterbox.moe

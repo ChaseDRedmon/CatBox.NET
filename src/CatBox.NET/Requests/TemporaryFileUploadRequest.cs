@@ -1,4 +1,6 @@
-﻿namespace CatBox.NET;
+﻿using CatBox.NET.Enums;
+
+namespace CatBox.NET.Requests;
 
 /// <summary>
 /// A temporary request for a collection of one or more files

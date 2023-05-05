@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Requests;
 
 /// <summary>
 /// Wraps a request to edit an existing album with new files, new title, new description

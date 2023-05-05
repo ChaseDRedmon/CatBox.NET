@@ -1,4 +1,4 @@
-﻿namespace CatBox.NET;
+﻿namespace CatBox.NET.Enums;
 
 /// <summary>
 /// A class for organizing request strings and arguments for the library and the API
