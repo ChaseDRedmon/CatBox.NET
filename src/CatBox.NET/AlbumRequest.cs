@@ -5,7 +5,6 @@
 /// </summary>
 public record AlbumRequest
 {
-
     /// <summary>
     /// <see cref="CatBoxRequestTypes"/>
     /// </summary>

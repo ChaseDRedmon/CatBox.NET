@@ -5,10 +5,8 @@
 /// </summary>
 public record FileUploadRequest : UploadRequest
 {
-
     /// <summary>
     /// A collection of file streams to upload
     /// </summary>
     public required IEnumerable<FileInfo> Files { get; init; }
-
 }

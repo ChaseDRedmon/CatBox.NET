@@ -5,7 +5,6 @@
 /// </summary>
 public record DeleteFileRequest
 {
-
     /// <summary>
     /// The UserHash that owns the associated files
     /// </summary>

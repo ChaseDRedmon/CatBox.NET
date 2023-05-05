@@ -5,7 +5,6 @@
 /// </summary>
 public record EditAlbumRequest
 {
-
     /// <summary>
     /// The UserHash that owns the album
     /// </summary>

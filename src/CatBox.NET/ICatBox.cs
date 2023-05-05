@@ -7,11 +7,11 @@
 /// <remarks>Not currently implemented so don't use</remarks>
 public interface ICatBox
 {
-    public Task UploadFile();
-    public Task DeleteFile();
-    public Task CreateAlbum();
-    public Task EditAlbum();
-    public Task AddToAlbum();
-    public Task RemoveFromAlbum();
-    public Task DeleteAlbum();
+    Task UploadFile();
+    Task DeleteFile();
+    Task CreateAlbum();
+    Task EditAlbum();
+    Task AddToAlbum();
+    Task RemoveFromAlbum();
+    Task DeleteAlbum();
 }

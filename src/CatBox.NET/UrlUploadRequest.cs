@@ -5,10 +5,8 @@
 /// </summary>
 public record UrlUploadRequest : UploadRequest
 {
-
     /// <summary>
     /// A collection of URLs to upload
     /// </summary>
     public required IEnumerable<Uri> Files { get; init; }
-
 }

@@ -5,7 +5,6 @@
 /// </summary>
 public enum ExpireAfter
 {
-    
     /// <summary>
     /// Expire after 1 hour
     /// </summary>

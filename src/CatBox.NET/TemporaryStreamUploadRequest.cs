@@ -5,11 +5,10 @@
 /// </summary>
 public record TemporaryStreamUploadRequest
 {
-
     /// <summary>
     /// When the image should be expired
     /// </summary>
-    public required ExpireAfter ExpireAfter { get; init; }
+    public required ExpireAfter Expiry { get; init; }
 
     /// <summary>
     /// The name of the file

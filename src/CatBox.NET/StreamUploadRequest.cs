@@ -14,5 +14,4 @@ public record StreamUploadRequest : UploadRequest
     /// The byte stream that contains the image data
     /// </summary>
     public required Stream Stream { get; init; }
-
 }

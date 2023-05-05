@@ -37,7 +37,7 @@ public class LitterboxClient : ILitterboxClient
             using var content = new MultipartFormDataContent();
             
             await using var fileStream = File.OpenRead(imageFile.FullName);
-            content.Add(new StringContent(temporaryFileUploadRequest.ExpireAfter.ToRequest()), CatBoxRequestStrings.ExpiryType);
+            content.Add(new StringContent(temporaryFileUploadRequest.Expiry.ToRequest()), CatBoxRequestStrings.ExpiryType);
             content.Add(new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType);
             content.Add(new StreamContent(fileStream), CatBoxRequestStrings.FileToUploadType, imageFile.Name);
             request.Content = content;
@@ -59,7 +59,7 @@ public class LitterboxClient : ILitterboxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.LitterboxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(temporaryStreamUploadRequest.ExpireAfter.ToRequest()), CatBoxRequestStrings.ExpiryType },
+            { new StringContent(temporaryStreamUploadRequest.Expiry.ToRequest()), CatBoxRequestStrings.ExpiryType },
             { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType },
             { new StreamContent(temporaryStreamUploadRequest.Stream), CatBoxRequestStrings.FileToUploadType, temporaryStreamUploadRequest.FileName }
         };
