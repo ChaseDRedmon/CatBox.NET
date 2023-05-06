@@ -35,13 +35,15 @@ public class LitterboxClient : ILitterboxClient
 
         foreach (var imageFile in temporaryFileUploadRequest.Files.Where(static f => IsFileExtensionValid(f.Extension)))
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, _config.LitterboxUrl);
-            using var content = new MultipartFormDataContent();
-            
             await using var fileStream = File.OpenRead(imageFile.FullName);
-            content.Add(new StringContent(temporaryFileUploadRequest.Expiry.ToRequest()), CatBoxRequestStrings.ExpiryType);
-            content.Add(new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType);
-            content.Add(new StreamContent(fileStream), CatBoxRequestStrings.FileToUploadType, imageFile.Name);
+            
+            using var request = new HttpRequestMessage(HttpMethod.Post, _config.LitterboxUrl);
+            using var content = new MultipartFormDataContent()
+            {
+                { new StringContent(temporaryFileUploadRequest.Expiry.ToRequest()), CatBoxRequestStrings.ExpiryType },
+                { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType },
+                { new StreamContent(fileStream), CatBoxRequestStrings.FileToUploadType, imageFile.Name }
+            };
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);

@@ -35,16 +35,18 @@ public class CatBoxClient : ICatBoxClient
 
         foreach (var imageFile in fileUploadRequest.Files.Where(static f => IsFileExtensionValid(f.Extension)))
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
-            using var content = new MultipartFormDataContent();
-            
             await using var fileStream = File.OpenRead(imageFile.FullName);
-            content.Add(new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType);
+            
+            using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+            using var content = new MultipartFormDataContent
+            {
+                { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType },
+                { new StreamContent(fileStream), CatBoxRequestStrings.FileToUploadType, imageFile.Name }
+            };
 
             if (!string.IsNullOrWhiteSpace(fileUploadRequest.UserHash))
                 content.Add(new StringContent(fileUploadRequest.UserHash), CatBoxRequestStrings.UserHashType);
-
-            content.Add(new StreamContent(fileStream), CatBoxRequestStrings.FileToUploadType, imageFile.Name);
+            
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -64,13 +66,13 @@ public class CatBoxClient : ICatBoxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType }
+            { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType },
+            { new StreamContent(fileUploadRequest.Stream), CatBoxRequestStrings.FileToUploadType, fileUploadRequest.FileName }
         };
 
         if (!string.IsNullOrWhiteSpace(fileUploadRequest.UserHash))
             content.Add(new StringContent(fileUploadRequest.UserHash), CatBoxRequestStrings.UserHashType);
-
-        content.Add(new StreamContent(fileUploadRequest.Stream), CatBoxRequestStrings.FileToUploadType, fileUploadRequest.FileName);
+        
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -85,18 +87,19 @@ public class CatBoxClient : ICatBoxClient
 
         foreach (var fileUrl in urlUploadRequest.Files)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
-            using var content = new MultipartFormDataContent(); // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
-
             if (fileUrl is null)
                 continue;
-
-            content.Add(new StringContent(CatBoxRequestTypes.UrlUpload.ToRequest()), CatBoxRequestStrings.RequestType);
+            
+            using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+            using var content = new MultipartFormDataContent // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
+            {
+                { new StringContent(CatBoxRequestTypes.UrlUpload.ToRequest()), CatBoxRequestStrings.RequestType },
+                { new StringContent(fileUrl.AbsoluteUri), CatBoxRequestStrings.UrlType }
+            }; 
 
             if (!string.IsNullOrWhiteSpace(urlUploadRequest.UserHash))
                 content.Add(new StringContent(urlUploadRequest.UserHash), CatBoxRequestStrings.UserHashType);
-
-            content.Add(new StringContent(fileUrl.AbsoluteUri), CatBoxRequestStrings.UrlType);
+            
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -161,18 +164,17 @@ public class CatBoxClient : ICatBoxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(CatBoxRequestTypes.CreateAlbum.ToRequest()), CatBoxRequestStrings.RequestType }
+            { new StringContent(CatBoxRequestTypes.CreateAlbum.ToRequest()), CatBoxRequestStrings.RequestType },
+            { new StringContent(createAlbumRequest.Title), CatBoxRequestStrings.TitleType },
+            { new StringContent(fileNames), CatBoxRequestStrings.FileType }
         };
 
         if (!string.IsNullOrWhiteSpace(createAlbumRequest.UserHash))
             content.Add(new StringContent(createAlbumRequest.UserHash), CatBoxRequestStrings.UserHashType);
-
-        content.Add(new StringContent(createAlbumRequest.Title), CatBoxRequestStrings.TitleType);
         
         if (!string.IsNullOrWhiteSpace(createAlbumRequest.Description))
             content.Add(new StringContent(createAlbumRequest.Description), CatBoxRequestStrings.DescriptionType);
         
-        content.Add(new StringContent(fileNames), CatBoxRequestStrings.FileType);
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
