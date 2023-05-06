@@ -47,7 +47,7 @@ public class LitterboxClient : ILitterboxClient
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            yield return await response.Content.ReadAsStringAsync(ct);
+            yield return await response.Content.ReadAsStringAsyncCore(ct);
         }
     }
     
@@ -70,6 +70,6 @@ public class LitterboxClient : ILitterboxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        return await response.Content.ReadAsStringAsyncCore(ct);
     }
 }

@@ -50,7 +50,7 @@ public class CatBoxClient : ICatBoxClient
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            yield return await response.Content.ReadAsStringAsync(ct);
+            yield return await response.Content.ReadAsStringAsyncCore(ct);
         }
     }
     
@@ -76,7 +76,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        return await response.Content.ReadAsStringAsyncCore(ct);
     }
 
     /// <inheritdoc/>
@@ -103,7 +103,7 @@ public class CatBoxClient : ICatBoxClient
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            yield return await response.Content.ReadAsStringAsync(ct);
+            yield return await response.Content.ReadAsStringAsyncCore(ct);
         }
     }
 
@@ -130,7 +130,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        return await response.Content.ReadAsStringAsyncCore(ct);
     }
     
     /// <inheritdoc/>
@@ -178,7 +178,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        return await response.Content.ReadAsStringAsyncCore(ct);
     }
     
     /// <inheritdoc/>
@@ -220,7 +220,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        return await response.Content.ReadAsStringAsyncCore(ct);
     }
     
     /// <inheritdoc/>
@@ -266,7 +266,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        return await response.Content.ReadAsStringAsyncCore(ct);
     }
 
     /// <summary>

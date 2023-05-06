@@ -21,4 +21,13 @@ internal static class Common
                 return true;
         }
     }
+    
+    public static Task<string> ReadAsStringAsyncCore(this HttpContent content, CancellationToken ct = default)
+    {
+#if NET5_0_OR_GREATER
+        return content.ReadAsStringAsync(ct);
+#else
+        return content.ReadAsStringAsync();
+#endif
+    }
 }
