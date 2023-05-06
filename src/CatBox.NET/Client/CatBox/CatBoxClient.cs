@@ -1,6 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Net;
+using System.Runtime.CompilerServices;
 using CatBox.NET.Enums;
-using CatBox.NET.Requests;
+using CatBox.NET.Requests.CatBox;
 using Microsoft.Extensions.Options;
 using static CatBox.NET.Client.Common;
 
@@ -134,20 +135,11 @@ public class CatBoxClient : ICatBoxClient
     }
     
     /// <inheritdoc/>
-    public async Task<string?> CreateAlbum(CreateAlbumRequest createAlbumRequest, CancellationToken ct = default)
+    public async Task<string?> CreateAlbum(RemoteCreateAlbumRequest remoteCreateAlbumRequest, CancellationToken ct = default)
     {
-        if (createAlbumRequest is null)
-            throw new ArgumentNullException(nameof(createAlbumRequest), "Argument cannot be null");
+        ThrowIfInvalidAlbumCreationRequest(remoteCreateAlbumRequest);
 
-        if (string.IsNullOrWhiteSpace(createAlbumRequest.Description))
-            throw new ArgumentNullException(nameof(createAlbumRequest.Description),
-                "Album description cannot be null, empty, or whitespace");
-
-        if (string.IsNullOrWhiteSpace(createAlbumRequest.Title))
-            throw new ArgumentNullException(nameof(createAlbumRequest.Title),
-                "Album title cannot be null, empty, or whitespace");
-
-        var links = createAlbumRequest.Files.Select(link =>
+        var links = remoteCreateAlbumRequest.Files.Select(link =>
         {
             if (link.Contains(_config.CatBoxUrl!.Host))
             {
@@ -159,28 +151,35 @@ public class CatBoxClient : ICatBoxClient
         
         var fileNames = string.Join(" ", links);
         if (string.IsNullOrWhiteSpace(fileNames))
-            throw new ArgumentNullException(nameof(createAlbumRequest.Files), "File list cannot be empty");
+            throw new ArgumentNullException(nameof(remoteCreateAlbumRequest.Files), "File list cannot be empty");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
             { new StringContent(CatBoxRequestTypes.CreateAlbum.ToRequest()), CatBoxRequestStrings.RequestType },
-            { new StringContent(createAlbumRequest.Title), CatBoxRequestStrings.TitleType },
+            { new StringContent(remoteCreateAlbumRequest.Title), CatBoxRequestStrings.TitleType },
             { new StringContent(fileNames), CatBoxRequestStrings.FileType }
         };
 
-        if (!string.IsNullOrWhiteSpace(createAlbumRequest.UserHash))
-            content.Add(new StringContent(createAlbumRequest.UserHash), CatBoxRequestStrings.UserHashType);
+        if (!string.IsNullOrWhiteSpace(remoteCreateAlbumRequest.UserHash))
+            content.Add(new StringContent(remoteCreateAlbumRequest.UserHash), CatBoxRequestStrings.UserHashType);
         
-        if (!string.IsNullOrWhiteSpace(createAlbumRequest.Description))
-            content.Add(new StringContent(createAlbumRequest.Description), CatBoxRequestStrings.DescriptionType);
+        if (!string.IsNullOrWhiteSpace(remoteCreateAlbumRequest.Description))
+            content.Add(new StringContent(remoteCreateAlbumRequest.Description), CatBoxRequestStrings.DescriptionType);
         
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
         return await response.Content.ReadAsStringAsyncCore(ct);
     }
-    
+
+    public async Task<string?> CreateAlbumFromUploadedFiles(LocalCreateAlbumRequest request, CancellationToken ct = default)
+    {
+        ThrowIfInvalidAlbumCreationRequest(request);
+        
+        
+    }
+
     /// <inheritdoc/>
     public async Task<string?> EditAlbum(EditAlbumRequest editAlbumRequest, CancellationToken ct = default)
     {
@@ -220,7 +219,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct);
+        return await response.ThrowIfUnsuccessfulResponse(ct);
     }
     
     /// <inheritdoc/>
@@ -266,9 +265,32 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct);
+        return await response.ThrowIfUnsuccessfulResponse(ct);
+        
+        // TODO: Find API Error Messages for Missing UserHashes and other required parameters
     }
+    
+    /// <summary>
+    /// Validates an Album Creation Request
+    /// </summary>
+    /// <param name="request">The album creation request to validate</param>
+    /// <exception cref="ArgumentNullException">when the request is null</exception>
+    /// <exception cref="ArgumentNullException">when the description is null</exception>
+    /// <exception cref="ArgumentNullException">when the title is null</exception>
+    private void ThrowIfInvalidAlbumCreationRequest(AlbumCreationRequest request)
+    {
+        if (request is null)
+            throw new ArgumentNullException(nameof(request), "Argument cannot be null");
 
+        if (string.IsNullOrWhiteSpace(request.Description))
+            throw new ArgumentNullException(nameof(request.Description),
+                "Album description cannot be null, empty, or whitespace");
+
+        if (string.IsNullOrWhiteSpace(request.Title))
+            throw new ArgumentNullException(nameof(request.Title),
+                "Album title cannot be null, empty, or whitespace");
+    }
+    
     /// <summary>
     /// 1. Filter Invalid Request Types on the Album Endpoint <br/>
     /// 2. Check that the user hash is not null, empty, or whitespace when attempting to modify or delete an album. User hash is required for those operations

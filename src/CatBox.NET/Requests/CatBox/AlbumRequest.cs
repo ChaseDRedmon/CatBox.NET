@@ -1,6 +1,6 @@
 ﻿using CatBox.NET.Enums;
 
-namespace CatBox.NET.Requests;
+namespace CatBox.NET.Requests.CatBox;
 
 /// <summary>
 /// Wraps a request to add files, remove files, or delete an album

@@ -1,6 +1,6 @@
 ﻿using CatBox.NET.Enums;
 
-namespace CatBox.NET.Requests;
+namespace CatBox.NET.Requests.Litterbox;
 
 /// <summary>
 /// A temporary request for an individual file upload

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using CatBox.NET.Enums;
-using CatBox.NET.Requests;
+using CatBox.NET.Requests.Litterbox;
 using Microsoft.Extensions.Options;
 using static CatBox.NET.Client.Common;
 
