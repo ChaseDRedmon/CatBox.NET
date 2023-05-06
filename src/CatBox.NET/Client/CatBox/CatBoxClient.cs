@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using CatBox.NET.Enums;
 using CatBox.NET.Requests.CatBox;
 using Microsoft.Extensions.Options;
@@ -31,8 +30,7 @@ public class CatBoxClient : ICatBoxClient
     /// <inheritdoc/>
     public async IAsyncEnumerable<string?> UploadMultipleImages(FileUploadRequest fileUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
     {
-        if (fileUploadRequest is null)
-            throw new ArgumentNullException(nameof(fileUploadRequest), "Argument cannot be null");
+        Throw.IfNull(fileUploadRequest);
 
         foreach (var imageFile in fileUploadRequest.Files.Where(static f => IsFileExtensionValid(f.Extension)))
         {
@@ -58,11 +56,8 @@ public class CatBoxClient : ICatBoxClient
     /// <inheritdoc/>
     public async Task<string?> UploadImage(StreamUploadRequest fileUploadRequest, CancellationToken ct = default)
     {
-        if (fileUploadRequest is null)
-            throw new ArgumentNullException(nameof(fileUploadRequest), "Argument cannot be null");
-
-        if (fileUploadRequest.FileName is null)
-            throw new ArgumentNullException(nameof(fileUploadRequest.FileName), "Argument cannot be null");
+        Throw.IfNull(fileUploadRequest);
+        Throw.IfStringIsNullOrWhitespace(fileUploadRequest.FileName, "Argument cannot be null, empty, or whitespace");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
@@ -83,8 +78,7 @@ public class CatBoxClient : ICatBoxClient
     /// <inheritdoc/>
     public async IAsyncEnumerable<string?> UploadMultipleUrls(UrlUploadRequest urlUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
     {
-        if (urlUploadRequest is null)
-            throw new ArgumentNullException(nameof(urlUploadRequest), "Argument cannot be null");
+        Throw.IfNull(urlUploadRequest);
 
         foreach (var fileUrl in urlUploadRequest.Files)
         {
@@ -111,15 +105,11 @@ public class CatBoxClient : ICatBoxClient
     /// <inheritdoc/>
     public async Task<string?> DeleteMultipleFiles(DeleteFileRequest deleteFileRequest, CancellationToken ct = default)
     {
-        if (deleteFileRequest is null)
-            throw new ArgumentNullException(nameof(deleteFileRequest), "Argument cannot be null");
-
-        if (string.IsNullOrWhiteSpace(deleteFileRequest.UserHash))
-            throw new ArgumentNullException(nameof(deleteFileRequest.UserHash), "Argument cannot be null");
+        Throw.IfNull(deleteFileRequest);
+        Throw.IfStringIsNullOrWhitespace(deleteFileRequest.UserHash, "Argument cannot be null, empty, or whitespace");
 
         var fileNames = string.Join(" ", deleteFileRequest.FileNames);
-        if (string.IsNullOrWhiteSpace(fileNames))
-            throw new ArgumentNullException(nameof(deleteFileRequest.FileNames), "File list cannot be empty");
+        Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
@@ -150,8 +140,7 @@ public class CatBoxClient : ICatBoxClient
         });
         
         var fileNames = string.Join(" ", links);
-        if (string.IsNullOrWhiteSpace(fileNames))
-            throw new ArgumentNullException(nameof(remoteCreateAlbumRequest.Files), "File list cannot be empty");
+        Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
@@ -183,28 +172,14 @@ public class CatBoxClient : ICatBoxClient
     /// <inheritdoc/>
     public async Task<string?> EditAlbum(EditAlbumRequest editAlbumRequest, CancellationToken ct = default)
     {
-        if (editAlbumRequest is null)
-            throw new ArgumentNullException(nameof(editAlbumRequest), "Argument cannot be null");
-
-        if (string.IsNullOrWhiteSpace(editAlbumRequest.UserHash))
-            throw new ArgumentNullException(nameof(editAlbumRequest.UserHash),
-                "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
-
-        if (string.IsNullOrWhiteSpace(editAlbumRequest.Description))
-            throw new ArgumentNullException(nameof(editAlbumRequest.Description),
-                "Album description cannot be null, empty, or whitespace");
-
-        if (string.IsNullOrWhiteSpace(editAlbumRequest.Title))
-            throw new ArgumentNullException(nameof(editAlbumRequest.Title),
-                "Album title cannot be null, empty, or whitespace");
-
-        if (string.IsNullOrWhiteSpace(editAlbumRequest.AlbumId))
-            throw new ArgumentNullException(nameof(editAlbumRequest.AlbumId),
-                "AlbumId (Short) cannot be null, empty, or whitespace");
-
+        Throw.IfNull(editAlbumRequest);
+        Throw.IfStringIsNullOrWhitespace(editAlbumRequest.UserHash, "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
+        Throw.IfStringIsNullOrWhitespace(editAlbumRequest.Description, "Album description cannot be null, empty, or whitespace");
+        Throw.IfStringIsNullOrWhitespace(editAlbumRequest.Title, "Album title cannot be null, empty, or whitespace");
+        Throw.IfStringIsNullOrWhitespace(editAlbumRequest.AlbumId, "AlbumId (Short) cannot be null, empty, or whitespace");
+        
         var fileNames = string.Join(" ", editAlbumRequest.Files);
-        if (string.IsNullOrWhiteSpace(fileNames))
-            throw new ArgumentNullException(nameof(editAlbumRequest.Files), "File list cannot be empty");
+        Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
@@ -225,17 +200,13 @@ public class CatBoxClient : ICatBoxClient
     /// <inheritdoc/>
     public async Task<string?> ModifyAlbum(AlbumRequest albumRequest, CancellationToken ct = default)
     {
-        if (albumRequest is null)
-            throw new ArgumentNullException(nameof(albumRequest), "Argument cannot be null");
-
+        Throw.IfNull(albumRequest);
+        Throw.IfStringIsNullOrWhitespace(albumRequest.UserHash, "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
+        
         if (IsAlbumRequestTypeValid(albumRequest))
 #pragma warning disable CA2208 // Instantiate argument exceptions correctly
             throw new ArgumentException("Invalid Request Type for album endpoint", nameof(albumRequest.Request));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
-
-        if (string.IsNullOrWhiteSpace(albumRequest.UserHash))
-            throw new ArgumentNullException(nameof(albumRequest.UserHash),
-                "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
 
         if (albumRequest.Request != CatBoxRequestTypes.AddToAlbum &&
             albumRequest.Request != CatBoxRequestTypes.RemoveFromAlbum &&
@@ -247,8 +218,7 @@ public class CatBoxClient : ICatBoxClient
         }
 
         var fileNames = string.Join(" ", albumRequest.Files);
-        if (string.IsNullOrWhiteSpace(fileNames))
-            throw new ArgumentNullException(nameof(albumRequest.Files), "File list cannot be empty");
+        Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
@@ -279,16 +249,9 @@ public class CatBoxClient : ICatBoxClient
     /// <exception cref="ArgumentNullException">when the title is null</exception>
     private void ThrowIfInvalidAlbumCreationRequest(AlbumCreationRequest request)
     {
-        if (request is null)
-            throw new ArgumentNullException(nameof(request), "Argument cannot be null");
-
-        if (string.IsNullOrWhiteSpace(request.Description))
-            throw new ArgumentNullException(nameof(request.Description),
-                "Album description cannot be null, empty, or whitespace");
-
-        if (string.IsNullOrWhiteSpace(request.Title))
-            throw new ArgumentNullException(nameof(request.Title),
-                "Album title cannot be null, empty, or whitespace");
+        Throw.IfNull(request);
+        Throw.IfStringIsNullOrWhitespace(request.Description, "Album description cannot be null, empty, or whitespace");
+        Throw.IfStringIsNullOrWhitespace(request.Title, "Album title cannot be null, empty, or whitespace");
     }
     
     /// <summary>
