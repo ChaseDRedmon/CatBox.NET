@@ -1,4 +1,5 @@
-﻿using CatBox.NET;
+﻿using CatBox.NET.Client;
+using CatBox.NET.Requests;
 using Moq;
 
 namespace CatBox.Tests.Unit.Requests;

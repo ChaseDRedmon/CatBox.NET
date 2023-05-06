@@ -1,6 +1,6 @@
-﻿using CatBox.NET;
+﻿using CatBox.NET.Client;
+using CatBox.NET.Requests;
 using FluentAssertions;
-using Microsoft.Extensions.Options;
 using Moq;
 
 namespace CatBox.Tests.Unit.Requests;
@@ -31,6 +31,4 @@ public class UploadImageMultipleTests
         // Assert
         fileUrls.Enumerating(x => x.ToEnumerable().First()).Should().Throw<ArgumentNullException>();
     }
-    
-    
 }
