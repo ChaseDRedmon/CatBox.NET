@@ -127,7 +127,7 @@ public class CatBoxClient : ICatBoxClient
     /// <inheritdoc/>
     public async Task<string?> CreateAlbum(RemoteCreateAlbumRequest remoteCreateAlbumRequest, CancellationToken ct = default)
     {
-        ThrowIfInvalidAlbumCreationRequest(remoteCreateAlbumRequest);
+        ThrowIfAlbumCreationRequestIsInvalid(remoteCreateAlbumRequest);
 
         var links = remoteCreateAlbumRequest.Files.Select(link =>
         {
@@ -141,7 +141,7 @@ public class CatBoxClient : ICatBoxClient
         
         var fileNames = string.Join(" ", links);
         Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
-
+        
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
@@ -152,21 +152,14 @@ public class CatBoxClient : ICatBoxClient
 
         if (!string.IsNullOrWhiteSpace(remoteCreateAlbumRequest.UserHash))
             content.Add(new StringContent(remoteCreateAlbumRequest.UserHash), CatBoxRequestStrings.UserHashType);
-        
+
         if (!string.IsNullOrWhiteSpace(remoteCreateAlbumRequest.Description))
             content.Add(new StringContent(remoteCreateAlbumRequest.Description), CatBoxRequestStrings.DescriptionType);
-        
+
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
         return await response.Content.ReadAsStringAsyncCore(ct);
-    }
-
-    public async Task<string?> CreateAlbumFromUploadedFiles(LocalCreateAlbumRequest request, CancellationToken ct = default)
-    {
-        ThrowIfInvalidAlbumCreationRequest(request);
-        
-        
     }
 
     /// <inheritdoc/>
@@ -247,7 +240,7 @@ public class CatBoxClient : ICatBoxClient
     /// <exception cref="ArgumentNullException">when the request is null</exception>
     /// <exception cref="ArgumentNullException">when the description is null</exception>
     /// <exception cref="ArgumentNullException">when the title is null</exception>
-    private void ThrowIfInvalidAlbumCreationRequest(AlbumCreationRequest request)
+    private void ThrowIfAlbumCreationRequestIsInvalid(AlbumCreationRequest request)
     {
         Throw.IfNull(request);
         Throw.IfStringIsNullOrWhitespace(request.Description, "Album description cannot be null, empty, or whitespace");

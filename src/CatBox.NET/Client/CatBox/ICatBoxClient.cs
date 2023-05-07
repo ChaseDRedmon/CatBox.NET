@@ -22,14 +22,6 @@ public interface ICatBoxClient
     /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
     /// <returns>Response string from the API</returns>
     IAsyncEnumerable<string?> UploadMultipleUrls(UrlUploadRequest urlUploadRequest, CancellationToken ct = default);
-    
-    /// <summary>
-    /// Uploads local files from PC to CatBox, then sends an Album creation request to catbox with the API file names of the uploaded files
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<string?> CreateAlbumFromUploadedFiles(LocalCreateAlbumRequest request, CancellationToken ct = default);
 
     /// <summary>
     /// Deletes multiple files by API file name

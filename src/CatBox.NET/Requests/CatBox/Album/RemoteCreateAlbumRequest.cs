@@ -1,7 +1,7 @@
 ﻿namespace CatBox.NET.Requests.CatBox;
 
 /// <summary>
-/// Wraps a request to create a new album and existing API files to it
+/// Wraps a request to create a new album with files that have been uploaded to the API already
 /// </summary>
 public record RemoteCreateAlbumRequest : AlbumCreationRequest
 {

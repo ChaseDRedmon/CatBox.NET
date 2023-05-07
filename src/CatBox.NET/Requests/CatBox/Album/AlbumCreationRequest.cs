@@ -1,5 +1,8 @@
 ﻿namespace CatBox.NET.Requests.CatBox;
 
+/// <summary>
+/// The necessary data structure to create an album 
+/// </summary>
 public abstract record AlbumCreationRequest
 {
     /// <summary>
