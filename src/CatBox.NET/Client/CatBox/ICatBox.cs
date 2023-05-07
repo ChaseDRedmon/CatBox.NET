@@ -9,6 +9,6 @@ namespace CatBox.NET.Client;
 /// <remarks>Not currently implemented so don't use</remarks>
 public interface ICatBox
 {
-    Task<string?> CreateAlbumFromFiles(UploadAndCreateAlbumRequest request, CancellationToken ct = default);
+    Task<string?> CreateAlbumFromFiles(CreateAlbumRequestFromFiles requestFromFiles, CancellationToken ct = default);
     Task CreateAlbumFromFiles(StreamUploadRequest request, CancellationToken ct = default);
 }

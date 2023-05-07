@@ -5,13 +5,8 @@ namespace CatBox.NET.Requests.Litterbox;
 /// <summary>
 /// A temporary request for an individual file upload
 /// </summary>
-public record TemporaryStreamUploadRequest
+public record TemporaryStreamUploadRequest : TemporaryRequest
 {
-    /// <summary>
-    /// When the image should be expired
-    /// </summary>
-    public required ExpireAfter Expiry { get; init; }
-
     /// <summary>
     /// The name of the file
     /// </summary>
