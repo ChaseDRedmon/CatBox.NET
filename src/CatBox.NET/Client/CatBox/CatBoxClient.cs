@@ -187,7 +187,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.ThrowIfUnsuccessfulResponse(ct);
+        return await response.Content.ReadAsStringAsyncCore(ct: ct);
     }
     
     /// <inheritdoc/>
@@ -228,8 +228,8 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.ThrowIfUnsuccessfulResponse(ct);
-        
+        return await response.Content.ReadAsStringAsyncCore(ct: ct);
+
         // TODO: Find API Error Messages for Missing UserHashes and other required parameters
     }
     

@@ -1,6 +1,4 @@
-﻿using System.Net;
-using System.Text;
-using CatBox.NET.Exceptions;
+﻿using System.Text;
 
 namespace CatBox.NET.Client;
 
@@ -8,6 +6,9 @@ internal static class Common
 {
     public const string FileNotFound = "File doesn't exist?";
     public const string AlbumNotFound = "No album found for user specified.";
+    public const string MissingRequestType = "No request type given.";
+    public const string MissingFileParameter = "No files given.";
+    public const string InvalidExpiry = "No expire time specified.";
     
     /// <summary>
     /// These file extensions are not allowed by the API, so filter them out
@@ -50,30 +51,5 @@ internal static class Common
         }
 
         return builder.ToString();
-    }
-    
-    /// <summary>
-    /// Checks the API response message against the error messages 
-    /// </summary>
-    /// <param name="message">API Response</param>
-    /// <param name="ct">Cancellation Token</param>
-    /// <returns>Message Response Body</returns>
-    /// <exception cref="CatBoxAlbumNotFoundException">when the CatBox album is not found on the server</exception>
-    /// <exception cref="CatBoxFileNotFoundException">when the CatBox file is not found on the server</exception>
-    public static async Task<string?> ThrowIfUnsuccessfulResponse(this HttpResponseMessage message, CancellationToken ct = default)
-    {
-        var messageBody = await message.Content.ReadAsStringAsyncCore(ct);
-        if (message.StatusCode != HttpStatusCode.PreconditionFailed) 
-            return messageBody;
-        
-        switch (messageBody)
-        {
-            case AlbumNotFound:
-                throw new CatBoxAlbumNotFoundException();
-            case FileNotFound:
-                throw new CatBoxFileNotFoundException();
-        }
-
-        return messageBody;
     }
 }
