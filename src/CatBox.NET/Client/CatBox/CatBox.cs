@@ -18,7 +18,7 @@ public sealed class Catbox : ICatBox
     }
     
     /// <summary>
-    /// 
+    /// Creates an album on CatBox from files that are uploaded in the request
     /// </summary>
     /// <param name="requestFromFiles"></param>
     /// <param name="ct"></param>
@@ -40,52 +40,52 @@ public sealed class Catbox : ICatBox
         return await _client.CreateAlbum(createAlbumRequest, ct);
     }
 
-    public Task CreateAlbumFromFiles(StreamUploadRequest request, CancellationToken ct = default)
-    {
-        var x = new EditAlbumRequest
-        {
-            UserHash = null,
-            AlbumId = null,
-            Title = null,
-            Description = null,
-            Files = null
-        };
-    }
-
     /// <summary>
-    /// 
+    /// Creates an album on CatBox from URLs that are specified in the request
     /// </summary>
-    /// <param name="requestFromFiles"></param>
+    /// <param name="requestFromUrls"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
     /// <inheritdoc/>
-    public async Task<string?> CreateAlbumFromUrls(CreateAlbumRequestFromFiles requestFromFiles, CancellationToken ct = default)
+    public async Task<string?> CreateAlbumFromUrls(CreateAlbumRequestFromUrls requestFromUrls, CancellationToken ct = default)
     {
         // TODO: Not super happy with the blocking enumerable implementation
 
-        var catBoxFileNames = _client.UploadMultipleUrls(requestFromFiles.UploadRequest, ct);
+        var catBoxFileNames = _client.UploadMultipleUrls(requestFromUrls.UrlUploadRequest, ct);
         var createAlbumRequest = new RemoteCreateAlbumRequest
         {
-            Title = requestFromFiles.Title,
-            Description = requestFromFiles.Description,
-            UserHash = requestFromFiles.UserHash,
+            Title = requestFromUrls.Title,
+            Description = requestFromUrls.Description,
+            UserHash = requestFromUrls.UserHash,
             Files = catBoxFileNames.ToBlockingEnumerable(cancellationToken: ct)
         };
 
         return await _client.CreateAlbum(createAlbumRequest, ct);
     }
-
-    public async Task CreateAlbumFromFiles(CreateAlbumRequestFromStream request, CancellationToken ct = default)
+    
+    /// <summary>
+    /// Creates an album on CatBox from files that are streamed to the API in the request
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="ct"></param>
+    public async Task<string?> CreateAlbumFromFiles(CreateAlbumRequestFromStream requestFromStream, CancellationToken ct = default)
     {
-        var catBoxFileNames = _client.UploadMultipleImages(request., ct);
+        var catBoxFileNames = new List<string>();
+
+        foreach (var request in requestFromStream.Request)
+        {
+            var fileName = await _client.UploadImage(request, ct);
+            catBoxFileNames.Add(fileName);
+        }
+        
         var createAlbumRequest = new RemoteCreateAlbumRequest
         {
-            Title = request.Title,
-            Description = request.Description,
-            UserHash = request.UserHash,
-            Files = catBoxFileNames.ToBlockingEnumerable(cancellationToken: ct)
+            Title = requestFromStream.Title,
+            Description = requestFromStream.Description,
+            UserHash = requestFromStream.UserHash,
+            Files = catBoxFileNames
         };
 
-        await _client.CreateAlbum(createAlbumRequest, ct);
+        return await _client.CreateAlbum(createAlbumRequest, ct);
     }
 }

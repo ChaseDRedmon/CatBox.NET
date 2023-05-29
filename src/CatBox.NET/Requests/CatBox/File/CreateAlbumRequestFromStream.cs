@@ -2,5 +2,5 @@
 
 public sealed record CreateAlbumRequestFromStream : AlbumCreationRequest
 {
-    public required StreamUploadRequest Request { get; init; }
+    public required IEnumerable<StreamUploadRequest> Request { get; init; }
 }
