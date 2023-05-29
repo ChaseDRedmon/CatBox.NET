@@ -3,7 +3,7 @@
 /// <summary>
 /// A temporary request for an individual file upload
 /// </summary>
-public record TemporaryStreamUploadRequest : TemporaryRequest
+public sealed record TemporaryStreamUploadRequest : TemporaryRequest
 {
     /// <summary>
     /// The name of the file

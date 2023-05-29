@@ -3,7 +3,7 @@
 /// <summary>
 /// Wraps multiple files to upload to the API
 /// </summary>
-public record FileUploadRequest : UploadRequest
+public sealed record FileUploadRequest : UploadRequest
 {
     /// <summary>
     /// A collection of files paths to upload
