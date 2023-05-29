@@ -3,7 +3,7 @@
 /// <summary>
 /// A temporary request for a collection of one or more files
 /// </summary>
-public record TemporaryFileUploadRequest : TemporaryRequest
+public sealed record TemporaryFileUploadRequest : TemporaryRequest
 {
     /// <summary>
     /// A collection of files to upload

@@ -5,7 +5,7 @@ namespace CatBox.NET.Requests.CatBox;
 /// <summary>
 /// Wraps a request to add files, remove files, or delete an album
 /// </summary>
-public record AlbumRequest
+public sealed record AlbumRequest
 {
     /// <summary>
     /// <see cref="CatBoxRequestTypes"/>
