@@ -10,7 +10,7 @@ public interface ICatBoxClient
     /// <param name="fileUploadRequest"></param>
     /// <param name="ct">Cancellation Token</param>
     /// <exception cref="ArgumentNullException">When <see cref="FileUploadRequest"/> is null</exception>
-    /// <returns>Response string from the API</returns>
+    /// <returns>Yield returns the CatBox filename of the uploaded image</returns>
     IAsyncEnumerable<string?> UploadMultipleImages(FileUploadRequest fileUploadRequest, CancellationToken ct = default);
 
     /// <summary>
@@ -20,7 +20,7 @@ public interface ICatBoxClient
     /// <param name="ct">Cancellation Token</param>
     /// <exception cref="ArgumentNullException">When <see cref="UrlUploadRequest"/> is null</exception>
     /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
-    /// <returns>Response string from the API</returns>
+    /// <returns>Yield returns the CatBox filename of the uploaded image</returns>
     IAsyncEnumerable<string?> UploadMultipleUrls(UrlUploadRequest urlUploadRequest, CancellationToken ct = default);
 
     /// <summary>
@@ -43,7 +43,7 @@ public interface ICatBoxClient
     /// <exception cref="ArgumentNullException">When <see cref="StreamUploadRequest"/> is null</exception>
     /// <exception cref="ArgumentNullException">When <see cref="StreamUploadRequest.FileName"/> is null</exception>
     /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
-    /// <returns>Response string from the API</returns>
+    /// <returns>Returns the CatBox filename of the uploaded image</returns>
     Task<string?> UploadImage(StreamUploadRequest fileUploadRequest, CancellationToken ct = default);
 
     /// <summary>
@@ -56,7 +56,7 @@ public interface ICatBoxClient
     /// <exception cref="ArgumentNullException"> when <see cref="RemoteCreateAlbumRequest.Title"/> is null, empty, or whitespace</exception>
     /// <exception cref="ArgumentNullException"> when <see cref="RemoteCreateAlbumRequest.Files"/> is null, empty, or whitespace</exception>
     /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
-    /// <returns>Response string from the API</returns>
+    /// <returns>Returns the created album URL</returns>
     Task<string?> CreateAlbum(RemoteCreateAlbumRequest remoteCreateAlbumRequest, CancellationToken ct = default);
 
     /// <summary>
@@ -77,14 +77,14 @@ public interface ICatBoxClient
     /// <summary>
     /// This endpoint is for adding files to an album, removing files from an album, or deleting the album
     /// </summary>
-    /// <param name="albumRequest">Data to pass to the API</param>
+    /// <param name="modifyAlbumImagesRequest">Data to pass to the API</param>
     /// <param name="ct">Cancellation Token</param>
-    /// <exception cref="ArgumentNullException"> when <see cref="AlbumRequest"/> </exception>
-    /// <exception cref="ArgumentNullException"> when <see cref="AlbumRequest.UserHash"/> is null, empty, or whitespace</exception>
-    /// <exception cref="ArgumentNullException"> when <see cref="AlbumRequest.Files"/> is null, empty, or whitespace</exception>
-    /// <exception cref="ArgumentException"> when <see cref="AlbumRequest.Request"/> is not valid for this request type</exception>
-    /// <exception cref="InvalidOperationException"> when <see cref="AlbumRequest.Request"/> is not CatBoxRequestTypes.AddToAlbum, CatBoxRequestTypes.RemoveFromAlbum, CatBoxRequestTypes.DeleteAlbum</exception>
+    /// <exception cref="ArgumentNullException"> when <see cref="ModifyAlbumImagesRequest"/> </exception>
+    /// <exception cref="ArgumentNullException"> when <see cref="ModifyAlbumImagesRequest.UserHash"/> is null, empty, or whitespace</exception>
+    /// <exception cref="ArgumentNullException"> when <see cref="ModifyAlbumImagesRequest.Files"/> is null, empty, or whitespace</exception>
+    /// <exception cref="ArgumentException"> when <see cref="ModifyAlbumImagesRequest.Request"/> is not valid for this request type</exception>
+    /// <exception cref="InvalidOperationException"> when <see cref="ModifyAlbumImagesRequest.Request"/> is not CatBoxRequestTypes.AddToAlbum, CatBoxRequestTypes.RemoveFromAlbum, CatBoxRequestTypes.DeleteAlbum</exception>
     /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
     /// <returns>Response string from the API</returns>
-    Task<string?> ModifyAlbum(AlbumRequest albumRequest, CancellationToken ct = default);
+    Task<string?> ModifyAlbum(ModifyAlbumImagesRequest modifyAlbumImagesRequest, CancellationToken ct = default);
 }

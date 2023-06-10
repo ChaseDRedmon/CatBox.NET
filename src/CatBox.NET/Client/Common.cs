@@ -41,8 +41,7 @@ internal static class Common
     
     public static async Task<string> ToStringAsync(this IAsyncEnumerable<string?> asyncEnumerable, CancellationToken ct = default)
     {
-        if (asyncEnumerable is null)
-            throw new ArgumentNullException(nameof(asyncEnumerable), "Argument cannot be null");
+        Throw.IfNull(asyncEnumerable);
 
         var builder = new StringBuilder();
         await foreach (var s in asyncEnumerable.WithCancellation(ct))

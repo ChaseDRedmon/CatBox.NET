@@ -3,9 +3,9 @@
 namespace CatBox.NET.Requests.CatBox;
 
 /// <summary>
-/// Wraps a request to add files, remove files, or delete an album
+/// 
 /// </summary>
-public sealed record AlbumRequest
+public abstract record Album
 {
     /// <summary>
     /// <see cref="CatBoxRequestTypes"/>
@@ -21,10 +21,4 @@ public sealed record AlbumRequest
     /// The unique identifier for the album
     /// </summary>
     public required string AlbumId { get; init; }
-
-    /// <summary>
-    /// The list of files associated with the album
-    /// </summary>
-    /// <remarks><see cref="Request"/> may alter the significance of this collection</remarks>
-    public required IEnumerable<string> Files { get; init; }
 }
