@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using CatBox.NET.Client;
 using CatBox.NET.Exceptions;
+using CatBox.NET.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -48,11 +49,11 @@ internal sealed class ExceptionHandler : DelegatingHandler
     {
         var response = await base.SendAsync(request, cancellationToken);
         if (response.StatusCode != HttpStatusCode.PreconditionFailed)
-            return await Task.FromResult(response); // I feel like this is a really dumb way to return this
+            return await Task.FromResult(response); // TODO: this is stupid
         
         var content = response.Content;
         var apiErrorMessage = await content.ReadAsStringAsyncCore(ct: cancellationToken);
-        _logger.LogError("HttpStatus: {StatusCode} - {Message}", response.StatusCode, apiErrorMessage);
+        _logger.LogCatBoxAPIException(response.StatusCode, apiErrorMessage);
 
         throw apiErrorMessage switch
         {
@@ -63,7 +64,7 @@ internal sealed class ExceptionHandler : DelegatingHandler
             Common.MissingRequestType => new CatBoxMissingRequestTypeException(),
             _ when response.StatusCode is >= HttpStatusCode.BadRequest and < HttpStatusCode.InternalServerError => new HttpRequestException($"Generic Request Failure: {apiErrorMessage}"),
             _ when response.StatusCode >= HttpStatusCode.InternalServerError => new HttpRequestException($"Generic Internal Server Error: {apiErrorMessage}"),
-            _ => new InvalidOperationException($"I don't know how you got here, but please create an issue on our GitHub: {apiErrorMessage}")
+            _ => new InvalidOperationException($"I don't know how you got here, but please create an issue on our GitHub (https://github.com/ChaseDRedmon/CatBox.NET): {apiErrorMessage}")
         };
     }
 }

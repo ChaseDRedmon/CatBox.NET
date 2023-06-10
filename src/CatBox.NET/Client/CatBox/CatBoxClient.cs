@@ -82,8 +82,7 @@ public class CatBoxClient : ICatBoxClient
 
         foreach (var fileUrl in urlUploadRequest.Files)
         {
-            if (fileUrl is null)
-                continue;
+            if (fileUrl is null) continue;
             
             using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
             using var content = new MultipartFormDataContent // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
@@ -131,7 +130,7 @@ public class CatBoxClient : ICatBoxClient
 
         var links = remoteCreateAlbumRequest.Files.Select(link =>
         {
-            if (link.Contains(_config.CatBoxUrl!.Host))
+            if (link?.Contains(_config.CatBoxUrl!.Host) is true)
             {
                 return new Uri(link).PathAndQuery[1..];
             }
@@ -163,7 +162,9 @@ public class CatBoxClient : ICatBoxClient
     }
 
     /// <inheritdoc/>
+#pragma warning disable CS0618 // API is not Obsolete, but should warn the user of dangerous functionality
     public async Task<string?> EditAlbum(EditAlbumRequest editAlbumRequest, CancellationToken ct = default)
+#pragma warning restore CS0618 // API is not Obsolete, but should warn the user of dangerous functionality
     {
         Throw.IfNull(editAlbumRequest);
         Throw.IfStringIsNullOrWhitespace(editAlbumRequest.UserHash, "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
@@ -184,6 +185,7 @@ public class CatBoxClient : ICatBoxClient
             { new StringContent(editAlbumRequest.Description), CatBoxRequestStrings.DescriptionType },
             { new StringContent(fileNames), CatBoxRequestStrings.FileType }
         };
+        
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -191,38 +193,38 @@ public class CatBoxClient : ICatBoxClient
     }
     
     /// <inheritdoc/>
-    public async Task<string?> ModifyAlbum(AlbumRequest albumRequest, CancellationToken ct = default)
+    public async Task<string?> ModifyAlbum(ModifyAlbumImagesRequest modifyAlbumImagesRequest, CancellationToken ct = default)
     {
-        Throw.IfNull(albumRequest);
-        Throw.IfStringIsNullOrWhitespace(albumRequest.UserHash, "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
+        Throw.IfNull(modifyAlbumImagesRequest);
+        Throw.IfStringIsNullOrWhitespace(modifyAlbumImagesRequest.UserHash, "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
         
-        if (IsAlbumRequestTypeValid(albumRequest))
+        if (IsAlbumRequestTypeValid(modifyAlbumImagesRequest))
 #pragma warning disable CA2208 // Instantiate argument exceptions correctly
-            throw new ArgumentException("Invalid Request Type for album endpoint", nameof(albumRequest.Request));
+            throw new ArgumentException("Invalid Request Type for album endpoint", nameof(modifyAlbumImagesRequest.Request));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
 
-        if (albumRequest.Request != CatBoxRequestTypes.AddToAlbum &&
-            albumRequest.Request != CatBoxRequestTypes.RemoveFromAlbum &&
-            albumRequest.Request != CatBoxRequestTypes.DeleteAlbum)
+        if (modifyAlbumImagesRequest.Request != CatBoxRequestTypes.AddToAlbum &&
+            modifyAlbumImagesRequest.Request != CatBoxRequestTypes.RemoveFromAlbum &&
+            modifyAlbumImagesRequest.Request != CatBoxRequestTypes.DeleteAlbum)
         {
             throw new InvalidOperationException(
                 "The ModifyAlbum method only supports CatBoxRequestTypes.AddToAlbum, CatBoxRequestTypes.RemoveFromAlbum, and CatBoxRequestTypes.DeleteAlbum. " +
                 "Use Task<string?> EditAlbum(EditAlbumRequest? editAlbumRequest, CancellationToken ct = default) to edit an album");
         }
 
-        var fileNames = string.Join(" ", albumRequest.Files);
+        var fileNames = string.Join(" ", modifyAlbumImagesRequest.Files);
         Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(albumRequest.Request.ToRequest()), CatBoxRequestStrings.RequestType },
-            { new StringContent(albumRequest.UserHash), CatBoxRequestStrings.UserHashType },
-            { new StringContent(albumRequest.AlbumId), CatBoxRequestStrings.AlbumIdShortType }
+            { new StringContent(modifyAlbumImagesRequest.Request.ToRequest()), CatBoxRequestStrings.RequestType },
+            { new StringContent(modifyAlbumImagesRequest.UserHash), CatBoxRequestStrings.UserHashType },
+            { new StringContent(modifyAlbumImagesRequest.AlbumId), CatBoxRequestStrings.AlbumIdShortType }
         };
 
         // If request type is AddToAlbum or RemoveFromAlbum
-        if (albumRequest.Request is CatBoxRequestTypes.AddToAlbum or CatBoxRequestTypes.RemoveFromAlbum)
+        if (modifyAlbumImagesRequest.Request is CatBoxRequestTypes.AddToAlbum or CatBoxRequestTypes.RemoveFromAlbum)
             content.Add(new StringContent(fileNames), CatBoxRequestStrings.FileType);
 
         request.Content = content;
@@ -251,17 +253,17 @@ public class CatBoxClient : ICatBoxClient
     /// 1. Filter Invalid Request Types on the Album Endpoint <br/>
     /// 2. Check that the user hash is not null, empty, or whitespace when attempting to modify or delete an album. User hash is required for those operations
     /// </summary>
-    /// <param name="request"></param>
+    /// <param name="imagesRequest"></param>
     /// <returns></returns>
-    private static bool IsAlbumRequestTypeValid(AlbumRequest request)
+    private static bool IsAlbumRequestTypeValid(ModifyAlbumImagesRequest imagesRequest)
     {
-        switch (request.Request)
+        switch (imagesRequest.Request)
         {
             case CatBoxRequestTypes.CreateAlbum:
-            case CatBoxRequestTypes.EditAlbum when !string.IsNullOrWhiteSpace(request.UserHash):
-            case CatBoxRequestTypes.AddToAlbum when !string.IsNullOrWhiteSpace(request.UserHash):
-            case CatBoxRequestTypes.RemoveFromAlbum when !string.IsNullOrWhiteSpace(request.UserHash):
-            case CatBoxRequestTypes.DeleteAlbum when !string.IsNullOrWhiteSpace(request.UserHash):
+            case CatBoxRequestTypes.EditAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
+            case CatBoxRequestTypes.AddToAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
+            case CatBoxRequestTypes.RemoveFromAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
+            case CatBoxRequestTypes.DeleteAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
                 return true;
 
             case CatBoxRequestTypes.UploadFile:

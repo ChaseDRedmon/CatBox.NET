@@ -2,6 +2,7 @@
 
 namespace CatBox.NET.Client;
 
+/// <inheritdoc/>
 public sealed class Catbox : ICatBox
 {
     private readonly ICatBoxClient _client;
@@ -9,20 +10,12 @@ public sealed class Catbox : ICatBox
     /// <summary>
     /// Instantiate a new catbox class 
     /// </summary>
-    /// <param name="userHash"></param>
-    /// <param name="host"></param>
-    /// <param name="client"></param>
+    /// <param name="client">The CatBox Api Client</param>
     public Catbox(ICatBoxClient client)
     {
         _client = client;
     }
     
-    /// <summary>
-    /// Creates an album on CatBox from files that are uploaded in the request
-    /// </summary>
-    /// <param name="requestFromFiles"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     /// <inheritdoc/>
     public async Task<string?> CreateAlbumFromFiles(CreateAlbumRequestFromFiles requestFromFiles, CancellationToken ct = default)
     {
@@ -39,13 +32,7 @@ public sealed class Catbox : ICatBox
 
         return await _client.CreateAlbum(createAlbumRequest, ct);
     }
-
-    /// <summary>
-    /// Creates an album on CatBox from URLs that are specified in the request
-    /// </summary>
-    /// <param name="requestFromUrls"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
+    
     /// <inheritdoc/>
     public async Task<string?> CreateAlbumFromUrls(CreateAlbumRequestFromUrls requestFromUrls, CancellationToken ct = default)
     {
@@ -62,12 +49,8 @@ public sealed class Catbox : ICatBox
 
         return await _client.CreateAlbum(createAlbumRequest, ct);
     }
-    
-    /// <summary>
-    /// Creates an album on CatBox from files that are streamed to the API in the request
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
+
+    /// <inheritdoc/>
     public async Task<string?> CreateAlbumFromFiles(CreateAlbumRequestFromStream requestFromStream, CancellationToken ct = default)
     {
         var catBoxFileNames = new List<string>();
@@ -87,5 +70,51 @@ public sealed class Catbox : ICatBox
         };
 
         return await _client.CreateAlbum(createAlbumRequest, ct);
+    }
+    
+    /// <inheritdoc/>
+    public async Task<string?> UploadImagesToAlbum(UploadToAlbumRequest request, CancellationToken ct = default)
+    {
+        var requestType = request.Request;
+        var userHash = request.UserHash;
+        var albumId = request.AlbumId;
+        
+        if (request.UploadRequest.IsFirst) // Upload Multiple Images
+        {
+            var uploadedFiles = _client.UploadMultipleImages(request.UploadRequest.First, ct);
+            return await _client.ModifyAlbum(new ModifyAlbumImagesRequest
+            {
+                Request = requestType,
+                UserHash = userHash,
+                AlbumId = albumId,
+                Files = uploadedFiles.ToBlockingEnumerable()
+            }, ct);
+        }
+
+        if (request.UploadRequest.IsSecond) // Stream one image to be uploaded
+        {
+            var fileName = await _client.UploadImage(request.UploadRequest.Second, ct);
+            return await _client.ModifyAlbum(new ModifyAlbumImagesRequest
+            {
+                Request = requestType,
+                UserHash = userHash,
+                AlbumId = albumId,
+                Files  = new [] { fileName }
+            }, ct);
+        }
+        
+        if (request.UploadRequest.IsThird) // Upload Multiple URLs
+        {
+            var uploadedUrls = _client.UploadMultipleUrls(request.UploadRequest.Third, ct);
+            return await _client.ModifyAlbum(new ModifyAlbumImagesRequest
+            {
+                Request = requestType,
+                UserHash = userHash,
+                AlbumId = albumId,
+                Files  = uploadedUrls.ToBlockingEnumerable()
+            }, ct);
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(request.UploadRequest), "Invalid UploadRequest Type");
     }
 }

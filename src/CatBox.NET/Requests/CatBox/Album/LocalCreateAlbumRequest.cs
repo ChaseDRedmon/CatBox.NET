@@ -6,7 +6,7 @@
 public sealed record LocalCreateAlbumRequest : AlbumCreationRequest
 {
     /// <summary>
-    /// A collection of already uploaded file URLs to put together in the album
+    /// 
     /// </summary>
     public required IAsyncEnumerable<string?> Files { get; init; }
 }
