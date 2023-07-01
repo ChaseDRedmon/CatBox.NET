@@ -9,22 +9,22 @@ namespace CatBox.NET.Client;
 public class CatBoxClient : ICatBoxClient
 {
     private readonly HttpClient _client;
-    private readonly CatBoxConfig _config;
+    private readonly CatboxOptions _catboxOptions;
 
     /// <summary>
     /// Creates a new <see cref="CatBoxClient"/>
     /// </summary>
     /// <param name="client"><see cref="HttpClient"/></param>
-    /// <param name="config"><see cref="IOptions{TOptions}"/></param>
+    /// <param name="catboxOptions"><see cref="IOptions{TOptions}"/></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public CatBoxClient(HttpClient client, IOptions<CatBoxConfig> config)
+    public CatBoxClient(HttpClient client, IOptions<CatboxOptions> catboxOptions)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client), "HttpClient cannot be null");
 
-        if (config.Value.CatBoxUrl is null)
-            throw new ArgumentNullException(nameof(config.Value.CatBoxUrl), "CatBox API URL cannot be null. Check that URL was set by calling .AddCatBoxServices(f => f.CatBoxUrl = new Uri(\"https://catbox.moe/user/api.php\"))");
+        if (catboxOptions.Value.CatBoxUrl is null)
+            throw new ArgumentNullException(nameof(catboxOptions.Value.CatBoxUrl), "CatBox API URL cannot be null. Check that URL was set by calling .AddCatBoxServices(f => f.CatBoxUrl = new Uri(\"https://catbox.moe/user/api.php\"))");
 
-        _config = config.Value;
+        _catboxOptions = catboxOptions.Value;
     }
 
     /// <inheritdoc/>
@@ -36,15 +36,15 @@ public class CatBoxClient : ICatBoxClient
         {
             await using var fileStream = File.OpenRead(imageFile.FullName);
             
-            using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+            using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
             using var content = new MultipartFormDataContent
             {
-                { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType },
-                { new StreamContent(fileStream), CatBoxRequestStrings.FileToUploadType, imageFile.Name }
+                { new StringContent(ApiAction.UploadFile), RequestParameters.Request },
+                { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
             };
 
             if (!string.IsNullOrWhiteSpace(fileUploadRequest.UserHash))
-                content.Add(new StringContent(fileUploadRequest.UserHash), CatBoxRequestStrings.UserHashType);
+                content.Add(new StringContent(fileUploadRequest.UserHash), RequestParameters.UserHash);
             
             request.Content = content;
 
@@ -59,15 +59,15 @@ public class CatBoxClient : ICatBoxClient
         Throw.IfNull(fileUploadRequest);
         Throw.IfStringIsNullOrWhitespace(fileUploadRequest.FileName, "Argument cannot be null, empty, or whitespace");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(CatBoxRequestTypes.UploadFile.ToRequest()), CatBoxRequestStrings.RequestType },
-            { new StreamContent(fileUploadRequest.Stream), CatBoxRequestStrings.FileToUploadType, fileUploadRequest.FileName }
+            { new StringContent(ApiAction.UploadFile), RequestParameters.Request },
+            { new StreamContent(fileUploadRequest.Stream), RequestParameters.FileToUpload, fileUploadRequest.FileName }
         };
 
         if (!string.IsNullOrWhiteSpace(fileUploadRequest.UserHash))
-            content.Add(new StringContent(fileUploadRequest.UserHash), CatBoxRequestStrings.UserHashType);
+            content.Add(new StringContent(fileUploadRequest.UserHash), RequestParameters.UserHash);
         
         request.Content = content;
 
@@ -84,15 +84,15 @@ public class CatBoxClient : ICatBoxClient
         {
             if (fileUrl is null) continue;
             
-            using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+            using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
             using var content = new MultipartFormDataContent // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
             {
-                { new StringContent(CatBoxRequestTypes.UrlUpload.ToRequest()), CatBoxRequestStrings.RequestType },
-                { new StringContent(fileUrl.AbsoluteUri), CatBoxRequestStrings.UrlType }
+                { new StringContent(ApiAction.UrlUpload), RequestParameters.Request },
+                { new StringContent(fileUrl.AbsoluteUri), RequestParameters.Url }
             }; 
 
             if (!string.IsNullOrWhiteSpace(urlUploadRequest.UserHash))
-                content.Add(new StringContent(urlUploadRequest.UserHash), CatBoxRequestStrings.UserHashType);
+                content.Add(new StringContent(urlUploadRequest.UserHash), RequestParameters.UserHash);
             
             request.Content = content;
 
@@ -110,12 +110,12 @@ public class CatBoxClient : ICatBoxClient
         var fileNames = string.Join(" ", deleteFileRequest.FileNames);
         Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(CatBoxRequestTypes.DeleteFile.ToRequest()), CatBoxRequestStrings.RequestType },
-            { new StringContent(deleteFileRequest.UserHash), CatBoxRequestStrings.UserHashType },
-            { new StringContent(fileNames), CatBoxRequestStrings.FileType }
+            { new StringContent(ApiAction.DeleteFile), RequestParameters.Request },
+            { new StringContent(deleteFileRequest.UserHash), RequestParameters.UserHash },
+            { new StringContent(fileNames), RequestParameters.Files }
         };
         request.Content = content;
 
@@ -130,7 +130,7 @@ public class CatBoxClient : ICatBoxClient
 
         var links = remoteCreateAlbumRequest.Files.Select(link =>
         {
-            if (link?.Contains(_config.CatBoxUrl!.Host) is true)
+            if (link?.Contains(_catboxOptions.CatBoxUrl!.Host) is true)
             {
                 return new Uri(link).PathAndQuery[1..];
             }
@@ -141,19 +141,19 @@ public class CatBoxClient : ICatBoxClient
         var fileNames = string.Join(" ", links);
         Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
         
-        using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(CatBoxRequestTypes.CreateAlbum.ToRequest()), CatBoxRequestStrings.RequestType },
-            { new StringContent(remoteCreateAlbumRequest.Title), CatBoxRequestStrings.TitleType },
-            { new StringContent(fileNames), CatBoxRequestStrings.FileType }
+            { new StringContent(ApiAction.CreateAlbum), RequestParameters.Request },
+            { new StringContent(remoteCreateAlbumRequest.Title), RequestParameters.Title },
+            { new StringContent(fileNames), RequestParameters.Files }
         };
 
         if (!string.IsNullOrWhiteSpace(remoteCreateAlbumRequest.UserHash))
-            content.Add(new StringContent(remoteCreateAlbumRequest.UserHash), CatBoxRequestStrings.UserHashType);
+            content.Add(new StringContent(remoteCreateAlbumRequest.UserHash), RequestParameters.UserHash);
 
         if (!string.IsNullOrWhiteSpace(remoteCreateAlbumRequest.Description))
-            content.Add(new StringContent(remoteCreateAlbumRequest.Description), CatBoxRequestStrings.DescriptionType);
+            content.Add(new StringContent(remoteCreateAlbumRequest.Description), RequestParameters.Description);
 
         request.Content = content;
 
@@ -175,15 +175,15 @@ public class CatBoxClient : ICatBoxClient
         var fileNames = string.Join(" ", editAlbumRequest.Files);
         Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(CatBoxRequestTypes.EditAlbum.ToRequest()), CatBoxRequestStrings.RequestType },
-            { new StringContent(editAlbumRequest.UserHash), CatBoxRequestStrings.UserHashType },
-            { new StringContent(editAlbumRequest.AlbumId), CatBoxRequestStrings.AlbumIdShortType },
-            { new StringContent(editAlbumRequest.Title), CatBoxRequestStrings.TitleType },
-            { new StringContent(editAlbumRequest.Description), CatBoxRequestStrings.DescriptionType },
-            { new StringContent(fileNames), CatBoxRequestStrings.FileType }
+            { new StringContent(ApiAction.EditAlbum), RequestParameters.Request },
+            { new StringContent(editAlbumRequest.UserHash), RequestParameters.UserHash },
+            { new StringContent(editAlbumRequest.AlbumId), RequestParameters.AlbumIdShort },
+            { new StringContent(editAlbumRequest.Title), RequestParameters.Title },
+            { new StringContent(editAlbumRequest.Description), RequestParameters.Description },
+            { new StringContent(fileNames), RequestParameters.Files }
         };
         
         request.Content = content;
@@ -203,9 +203,9 @@ public class CatBoxClient : ICatBoxClient
             throw new ArgumentException("Invalid Request Type for album endpoint", nameof(modifyAlbumImagesRequest.Request));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
 
-        if (modifyAlbumImagesRequest.Request != CatBoxRequestTypes.AddToAlbum &&
-            modifyAlbumImagesRequest.Request != CatBoxRequestTypes.RemoveFromAlbum &&
-            modifyAlbumImagesRequest.Request != CatBoxRequestTypes.DeleteAlbum)
+        if (modifyAlbumImagesRequest.Request != RequestType.AddToAlbum &&
+            modifyAlbumImagesRequest.Request != RequestType.RemoveFromAlbum &&
+            modifyAlbumImagesRequest.Request != RequestType.DeleteAlbum)
         {
             throw new InvalidOperationException(
                 "The ModifyAlbum method only supports CatBoxRequestTypes.AddToAlbum, CatBoxRequestTypes.RemoveFromAlbum, and CatBoxRequestTypes.DeleteAlbum. " +
@@ -215,62 +215,21 @@ public class CatBoxClient : ICatBoxClient
         var fileNames = string.Join(" ", modifyAlbumImagesRequest.Files);
         Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _config.CatBoxUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(modifyAlbumImagesRequest.Request.ToRequest()), CatBoxRequestStrings.RequestType },
-            { new StringContent(modifyAlbumImagesRequest.UserHash), CatBoxRequestStrings.UserHashType },
-            { new StringContent(modifyAlbumImagesRequest.AlbumId), CatBoxRequestStrings.AlbumIdShortType }
+            { new StringContent(modifyAlbumImagesRequest.Request.ToRequest()), RequestParameters.Request },
+            { new StringContent(modifyAlbumImagesRequest.UserHash), RequestParameters.UserHash },
+            { new StringContent(modifyAlbumImagesRequest.AlbumId), RequestParameters.AlbumIdShort }
         };
 
         // If request type is AddToAlbum or RemoveFromAlbum
-        if (modifyAlbumImagesRequest.Request is CatBoxRequestTypes.AddToAlbum or CatBoxRequestTypes.RemoveFromAlbum)
-            content.Add(new StringContent(fileNames), CatBoxRequestStrings.FileType);
+        if (modifyAlbumImagesRequest.Request is RequestType.AddToAlbum or RequestType.RemoveFromAlbum)
+            content.Add(new StringContent(fileNames), RequestParameters.Files);
 
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
         return await response.Content.ReadAsStringAsyncCore(ct: ct);
-
-        // TODO: Find API Error Messages for Missing UserHashes and other required parameters
-    }
-    
-    /// <summary>
-    /// Validates an Album Creation Request
-    /// </summary>
-    /// <param name="request">The album creation request to validate</param>
-    /// <exception cref="ArgumentNullException">when the request is null</exception>
-    /// <exception cref="ArgumentNullException">when the description is null</exception>
-    /// <exception cref="ArgumentNullException">when the title is null</exception>
-    private void ThrowIfAlbumCreationRequestIsInvalid(AlbumCreationRequest request)
-    {
-        Throw.IfNull(request);
-        Throw.IfStringIsNullOrWhitespace(request.Description, "Album description cannot be null, empty, or whitespace");
-        Throw.IfStringIsNullOrWhitespace(request.Title, "Album title cannot be null, empty, or whitespace");
-    }
-    
-    /// <summary>
-    /// 1. Filter Invalid Request Types on the Album Endpoint <br/>
-    /// 2. Check that the user hash is not null, empty, or whitespace when attempting to modify or delete an album. User hash is required for those operations
-    /// </summary>
-    /// <param name="imagesRequest"></param>
-    /// <returns></returns>
-    private static bool IsAlbumRequestTypeValid(ModifyAlbumImagesRequest imagesRequest)
-    {
-        switch (imagesRequest.Request)
-        {
-            case CatBoxRequestTypes.CreateAlbum:
-            case CatBoxRequestTypes.EditAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-            case CatBoxRequestTypes.AddToAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-            case CatBoxRequestTypes.RemoveFromAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-            case CatBoxRequestTypes.DeleteAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-                return true;
-
-            case CatBoxRequestTypes.UploadFile:
-            case CatBoxRequestTypes.UrlUpload:
-            case CatBoxRequestTypes.DeleteFile:
-            default:
-                return false;
-        }
     }
 }

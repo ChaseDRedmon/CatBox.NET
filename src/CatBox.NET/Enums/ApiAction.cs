@@ -1,47 +1,50 @@
-﻿namespace CatBox.NET.Enums;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+
+namespace CatBox.NET.Enums;
 
 /// <summary>
-/// Types used for CatBox
+/// A class for 
 /// </summary>
-public enum CatBoxRequestTypes
+internal static class ApiAction
 {
     /// <summary>
     /// UploadFile => "fileupload"
     /// </summary>
-    UploadFile,
+    public static string UploadFile => "fileupload";
     
     /// <summary>
     /// UrlUpload => "urlupload"
     /// </summary>
-    UrlUpload,
+    public static string UrlUpload => "urlupload";
     
     /// <summary>
     /// DeleteFile => "deletefiles"
     /// </summary>
-    DeleteFile,
+    public static string DeleteFile => "deletefiles";
     
     /// <summary>
     /// CreateAlbum => "createalbum"
     /// </summary>
-    CreateAlbum,
+    public static string CreateAlbum => "createalbum";
     
     /// <summary>
     /// EditAlbum => "editalbum"
     /// </summary>
-    EditAlbum,
+    public static string EditAlbum => "editalbum";
     
     /// <summary>
     /// AddToAlbum => "addtoalbum"
     /// </summary>
-    AddToAlbum,
+    public static string AddToAlbum => "addtoalbum";
     
     /// <summary>
     /// RemoveFromAlbum => "removefromalbum"
     /// </summary>
-    RemoveFromAlbum,
+    public static string RemoveFromAlbum => "removefromalbum";
     
     /// <summary>
     /// DeleteFromAlbum => "deletealbum"
     /// </summary>
-    DeleteAlbum
+    public static string DeleteFromAlbum => "deletealbum";
 }
