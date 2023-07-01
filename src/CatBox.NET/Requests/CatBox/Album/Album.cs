@@ -8,9 +8,9 @@ namespace CatBox.NET.Requests.CatBox;
 public abstract record Album
 {
     /// <summary>
-    /// <see cref="CatBoxRequestTypes"/>
+    /// <see cref="RequestType"/>
     /// </summary>
-    public required CatBoxRequestTypes Request { get; init; }
+    public required RequestType Request { get; init; }
 
     /// <summary>
     /// The User who owns this album

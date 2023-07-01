@@ -3,7 +3,7 @@
 /// <summary>
 /// Configuration object for storing URLs to the API
 /// </summary>
-public record CatBoxConfig
+public record CatboxOptions
 {
     /// <summary>
     /// URL for the catbox.moe domain

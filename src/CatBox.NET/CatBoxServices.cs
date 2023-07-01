@@ -16,13 +16,12 @@ public static class CatBoxServices
     /// <param name="services">Service Collection</param>
     /// <param name="setupAction">Configure the URL to upload files too</param>
     /// <returns>Service Collection</returns>
-    public static IServiceCollection AddCatBoxServices(this IServiceCollection services, Action<CatBoxConfig> setupAction)
+    public static IServiceCollection AddCatBoxServices(this IServiceCollection services, Action<CatboxOptions> setupAction)
     {
         services
             .Configure(setupAction)
             .AddScoped<ExceptionHandler>()
             .AddScoped<ICatBox, Catbox>()
-            .AddScoped<ILitterboxClient, LitterboxClient>()
             .AddScoped<ICatBoxClient, CatBoxClient>()
             .AddScoped<ILitterboxClient, LitterboxClient>()
             .AddHttpClient<ICatBoxClient, CatBoxClient>()
@@ -40,7 +39,7 @@ internal sealed class ExceptionHandler : DelegatingHandler
 {
     private readonly ILogger<ExceptionHandler> _logger;
 
-    public ExceptionHandler(ILogger<ExceptionHandler>? logger = null)
+    public ExceptionHandler(ILogger<ExceptionHandler>? logger = null) : base(new HttpClientHandler())
     {
         _logger = logger ?? NullLogger<ExceptionHandler>.Instance;
     }
@@ -49,12 +48,12 @@ internal sealed class ExceptionHandler : DelegatingHandler
     {
         var response = await base.SendAsync(request, cancellationToken);
         if (response.StatusCode != HttpStatusCode.PreconditionFailed)
-            return await Task.FromResult(response); // TODO: this is stupid
-        
+            return response;
+            
         var content = response.Content;
         var apiErrorMessage = await content.ReadAsStringAsyncCore(ct: cancellationToken);
         _logger.LogCatBoxAPIException(response.StatusCode, apiErrorMessage);
-
+            
         throw apiErrorMessage switch
         {
             Common.AlbumNotFound => new CatBoxAlbumNotFoundException(),
