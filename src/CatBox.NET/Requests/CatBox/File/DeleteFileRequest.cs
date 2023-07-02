@@ -1,9 +1,9 @@
-﻿namespace CatBox.NET.Requests;
+﻿namespace CatBox.NET.Requests.CatBox;
 
 /// <summary>
 /// Wraps a request to delete files from the API
 /// </summary>
-public record DeleteFileRequest
+public sealed record DeleteFileRequest
 {
     /// <summary>
     /// The UserHash that owns the associated files

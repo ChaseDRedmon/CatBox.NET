@@ -1,9 +1,9 @@
-﻿namespace CatBox.NET.Requests;
+﻿namespace CatBox.NET.Requests.CatBox;
 
 /// <summary>
 /// Wraps multiple URLs to upload to the API
 /// </summary>
-public record UrlUploadRequest : UploadRequest
+public sealed record UrlUploadRequest : UploadRequest
 {
     /// <summary>
     /// A collection of URLs to upload

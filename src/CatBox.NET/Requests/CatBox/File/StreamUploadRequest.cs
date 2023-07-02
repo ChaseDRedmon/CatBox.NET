@@ -1,9 +1,9 @@
-﻿namespace CatBox.NET.Requests;
+﻿namespace CatBox.NET.Requests.CatBox;
 
 /// <summary>
 /// Wraps a network stream to stream content to the API
 /// </summary>
-public record StreamUploadRequest : UploadRequest
+public sealed record StreamUploadRequest : UploadRequest
 {
     /// <summary>
     /// The name of the file

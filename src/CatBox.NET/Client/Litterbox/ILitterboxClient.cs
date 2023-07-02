@@ -1,4 +1,5 @@
-﻿using CatBox.NET.Requests;
+﻿using CatBox.NET.Requests.CatBox;
+using CatBox.NET.Requests.Litterbox;
 
 namespace CatBox.NET.Client;
 
