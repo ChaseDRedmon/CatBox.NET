@@ -40,14 +40,14 @@ public class LitterboxClient : ILitterboxClient
             using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.LitterboxUrl);
             using var content = new MultipartFormDataContent
             {
-                { new StringContent(temporaryFileUploadRequest.Expiry.ToRequest()), RequestParameters.Expiry },
-                { new StringContent(ApiAction.UploadFile), RequestParameters.Request },
+                { new StringContent(temporaryFileUploadRequest.Expiry.Value()), RequestParameters.Expiry },
+                { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
                 { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
             };
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            yield return await response.Content.ReadAsStringAsyncCore(ct);
+            yield return await response.Content.ReadAsStringAsyncInternal(ct);
         }
     }
     
@@ -63,13 +63,13 @@ public class LitterboxClient : ILitterboxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.LitterboxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(temporaryStreamUploadRequest.Expiry.ToRequest()), RequestParameters.Expiry },
-            { new StringContent(ApiAction.UploadFile), RequestParameters.Request },
+            { new StringContent(temporaryStreamUploadRequest.Expiry.Value()), RequestParameters.Expiry },
+            { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
             { new StreamContent(temporaryStreamUploadRequest.Stream), RequestParameters.FileToUpload, temporaryStreamUploadRequest.FileName }
         };
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct);
+        return await response.Content.ReadAsStringAsyncInternal(ct);
     }
 }

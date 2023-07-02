@@ -39,7 +39,7 @@ public class CatBoxClient : ICatBoxClient
             using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
             using var content = new MultipartFormDataContent
             {
-                { new StringContent(ApiAction.UploadFile), RequestParameters.Request },
+                { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
                 { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
             };
 
@@ -49,7 +49,7 @@ public class CatBoxClient : ICatBoxClient
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            yield return await response.Content.ReadAsStringAsyncCore(ct);
+            yield return await response.Content.ReadAsStringAsyncInternal(ct);
         }
     }
     
@@ -62,7 +62,7 @@ public class CatBoxClient : ICatBoxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(ApiAction.UploadFile), RequestParameters.Request },
+            { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
             { new StreamContent(fileUploadRequest.Stream), RequestParameters.FileToUpload, fileUploadRequest.FileName }
         };
 
@@ -72,7 +72,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct);
+        return await response.Content.ReadAsStringAsyncInternal(ct);
     }
 
     /// <inheritdoc/>
@@ -87,7 +87,7 @@ public class CatBoxClient : ICatBoxClient
             using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
             using var content = new MultipartFormDataContent // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
             {
-                { new StringContent(ApiAction.UrlUpload), RequestParameters.Request },
+                { new StringContent(RequestType.UrlUpload.Value()), RequestParameters.Request },
                 { new StringContent(fileUrl.AbsoluteUri), RequestParameters.Url }
             }; 
 
@@ -97,7 +97,7 @@ public class CatBoxClient : ICatBoxClient
             request.Content = content;
 
             using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            yield return await response.Content.ReadAsStringAsyncCore(ct);
+            yield return await response.Content.ReadAsStringAsyncInternal(ct);
         }
     }
 
@@ -113,14 +113,14 @@ public class CatBoxClient : ICatBoxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(ApiAction.DeleteFile), RequestParameters.Request },
+            { new StringContent(RequestType.DeleteFile.Value()), RequestParameters.Request },
             { new StringContent(deleteFileRequest.UserHash), RequestParameters.UserHash },
             { new StringContent(fileNames), RequestParameters.Files }
         };
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct);
+        return await response.Content.ReadAsStringAsyncInternal(ct);
     }
     
     /// <inheritdoc/>
@@ -144,7 +144,7 @@ public class CatBoxClient : ICatBoxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(ApiAction.CreateAlbum), RequestParameters.Request },
+            { new StringContent(RequestType.CreateAlbum.Value()), RequestParameters.Request },
             { new StringContent(remoteCreateAlbumRequest.Title), RequestParameters.Title },
             { new StringContent(fileNames), RequestParameters.Files }
         };
@@ -158,7 +158,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct);
+        return await response.Content.ReadAsStringAsyncInternal(ct);
     }
 
     /// <inheritdoc/>
@@ -178,7 +178,7 @@ public class CatBoxClient : ICatBoxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(ApiAction.EditAlbum), RequestParameters.Request },
+            { new StringContent(RequestType.EditAlbum.Value()), RequestParameters.Request },
             { new StringContent(editAlbumRequest.UserHash), RequestParameters.UserHash },
             { new StringContent(editAlbumRequest.AlbumId), RequestParameters.AlbumIdShort },
             { new StringContent(editAlbumRequest.Title), RequestParameters.Title },
@@ -189,7 +189,7 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct: ct);
+        return await response.Content.ReadAsStringAsyncInternal(ct: ct);
     }
     
     /// <inheritdoc/>
@@ -218,7 +218,7 @@ public class CatBoxClient : ICatBoxClient
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(modifyAlbumImagesRequest.Request.ToRequest()), RequestParameters.Request },
+            { new StringContent(modifyAlbumImagesRequest.Request.Value()), RequestParameters.Request },
             { new StringContent(modifyAlbumImagesRequest.UserHash), RequestParameters.UserHash },
             { new StringContent(modifyAlbumImagesRequest.AlbumId), RequestParameters.AlbumIdShort }
         };
@@ -230,6 +230,6 @@ public class CatBoxClient : ICatBoxClient
         request.Content = content;
 
         using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncCore(ct: ct);
+        return await response.Content.ReadAsStringAsyncInternal(ct: ct);
     }
 }

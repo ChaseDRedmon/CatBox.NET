@@ -2,6 +2,9 @@
 
 namespace CatBox.NET.Requests.CatBox;
 
+/// <summary>
+/// A request for uploading files into an existing CatBox Album
+/// </summary>
 public record UploadToAlbumRequest : Album
 {
     /// <summary>
