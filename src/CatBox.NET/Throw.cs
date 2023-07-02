@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace CatBox.NET;
 
@@ -8,12 +9,12 @@ namespace CatBox.NET;
 /// </summary>
 internal static class Throw
 {
-    public static void IfStringIsNullOrWhitespace(string? s, string exceptionMessage, [CallerArgumentExpression("s")] string memberName = "")
+    public static void IfStringIsNullOrWhitespace([DoesNotReturnIf(true)] string? s, string exceptionMessage, [CallerArgumentExpression("s")] string memberName = "")
     {
         if (string.IsNullOrWhiteSpace(s)) throw new ArgumentNullException(memberName, exceptionMessage);
     }
 
-    public static void IfNull(object? s, [CallerArgumentExpression("s")] string memberName = "")
+    public static void IfNull([DoesNotReturnIf(true)] object? s, [CallerArgumentExpression("s")] string memberName = "")
     {
         if (s is null) throw new ArgumentNullException(memberName, "Argument cannot be null");
     }

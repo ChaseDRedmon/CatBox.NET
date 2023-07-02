@@ -3,7 +3,7 @@
 namespace CatBox.NET.Requests.CatBox;
 
 /// <summary>
-/// 
+/// An abstract request representing parameters needed to work with the Album API
 /// </summary>
 public abstract record Album
 {

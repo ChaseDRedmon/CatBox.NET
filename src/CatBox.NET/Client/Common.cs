@@ -1,19 +1,12 @@
-﻿using System.Net;
-using System.Text;
+﻿using System.Text;
+using BetterEnumsGen;
 using CatBox.NET.Enums;
-using CatBox.NET.Exceptions;
 using CatBox.NET.Requests.CatBox;
 
 namespace CatBox.NET.Client;
 
 internal static class Common
 {
-    public const string FileNotFound = "File doesn't exist?";
-    public const string AlbumNotFound = "No album found for user specified.";
-    public const string MissingRequestType = "No request type given.";
-    public const string MissingFileParameter = "No files given.";
-    public const string InvalidExpiry = "No expire time specified.";
-    
     /// <summary>
     /// These file extensions are not allowed by the API, so filter them out
     /// </summary>
@@ -34,7 +27,7 @@ internal static class Common
         }
     }
     
-    public static Task<string> ReadAsStringAsyncCore(this HttpContent content, CancellationToken ct = default)
+    public static Task<string> ReadAsStringAsyncInternal(this HttpContent content, CancellationToken ct = default)
     {
 #if NET5_0_OR_GREATER
         return content.ReadAsStringAsync(ct);
@@ -95,41 +88,7 @@ internal static class Common
         }
     }
     
-    /// <summary>
-    /// Converts a <see cref="CatBoxRequestTypes"/> to the CatBox.moe equivalent API parameter string
-    /// </summary>
-    /// <param name="requestTypes">A request type</param>
-    /// <returns>CatBox API Request String</returns>
-    /// <exception cref="ArgumentOutOfRangeException"> when an invalid request type is chosen</exception>
-    public static string ToRequest(this RequestType requestTypes) =>
-        requestTypes switch
-        {
-            RequestType.UploadFile => ApiAction.UploadFile,
-            RequestType.UrlUpload => ApiAction.UrlUpload,
-            RequestType.DeleteFile => ApiAction.DeleteFile,
-            RequestType.CreateAlbum => ApiAction.CreateAlbum,
-            RequestType.EditAlbum => ApiAction.EditAlbum,
-            RequestType.AddToAlbum => ApiAction.AddToAlbum,
-            RequestType.RemoveFromAlbum => ApiAction.RemoveFromAlbum,
-            RequestType.DeleteAlbum => ApiAction.DeleteFromAlbum,
-            _ => throw new ArgumentOutOfRangeException(nameof(requestTypes), requestTypes, null)
-        };
-
-    
-
-    /// <summary>
-    /// Converts a <see cref="ExpireAfter"/> value to the Litterbox.moe API equivalent time string
-    /// </summary>
-    /// <param name="expiry">Amount of time before an image expires and is deleted</param>
-    /// <returns>Litterbox API Time Equivalent parameter value</returns>
-    /// <exception cref="ArgumentOutOfRangeException"> when an invalid expiry value is chosen</exception>
-    public static string ToRequest(this ExpireAfter expiry) =>
-        expiry switch
-        {
-            ExpireAfter.OneHour => "1h",
-            ExpireAfter.TwelveHours => "12h",
-            ExpireAfter.OneDay => "24h",
-            ExpireAfter.ThreeDays => "72h",
-            _ => throw new ArgumentOutOfRangeException(nameof(expiry), expiry, null)
-        };
+    // Shortening GetApiValue().ApiValue method call -> GetValue()
+    public static string Value(this RequestType type) => type.GetApiValue()!.ApiValue;
+    public static string Value(this ExpireAfter expireAfter) => expireAfter.GetApiValue()!.ApiValue;
 }

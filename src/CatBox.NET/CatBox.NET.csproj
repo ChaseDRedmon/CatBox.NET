@@ -10,20 +10,20 @@
         <PackageProjectUrl>https://github.com/ChaseDRedmon/CatBox.NET</PackageProjectUrl>
         <RepositoryUrl>https://github.com/ChaseDRedmon/CatBox.NET</RepositoryUrl>
         <RepositoryType>Library</RepositoryType>
-        <PackageTags>Catbox, Catbox.moe, Imgur</PackageTags>
+        <PackageTags>Catbox, Catbox.moe, Imgur, GfyCat</PackageTags>
         <Copyright>Copyright © 2023 Chase Redmon</Copyright>
         <PackageLicenseUrl>https://github.com/ChaseDRedmon/CatBox.NET/blob/main/license.txt</PackageLicenseUrl>
-        <PackageReleaseNotes>Fix required description field on create album endpoint. Description is optional when creating an endpoint. </PackageReleaseNotes>
+        <PackageReleaseNotes>Fix required description field on create album endpoint. Description is optional when creating an endpoint.</PackageReleaseNotes>
         <TargetFrameworks>net7.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AnyOf" Version="0.3.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-      <PackageReference Include="PolySharp" Version="1.13.2">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
+        <PackageReference Include="AnyOf" Version="0.3.0"/>
+        <PackageReference Include="BetterEnums" Version="1.0.2" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0"/>
+        <PackageReference Include="PolySharp" Version="1.13.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
-
 </Project>
