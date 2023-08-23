@@ -30,8 +30,7 @@ public class LitterboxClient : ILitterboxClient
     /// <inheritdoc/>
     public async IAsyncEnumerable<string?> UploadMultipleImages(TemporaryFileUploadRequest temporaryFileUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
     {
-        if (temporaryFileUploadRequest is null)
-            throw new ArgumentNullException(nameof(temporaryFileUploadRequest), "Argument cannot be null");
+        Throw.IfNull(temporaryFileUploadRequest);
 
         foreach (var imageFile in temporaryFileUploadRequest.Files.Where(static f => IsFileExtensionValid(f.Extension)))
         {
@@ -54,11 +53,8 @@ public class LitterboxClient : ILitterboxClient
     /// <inheritdoc/>
     public async Task<string?> UploadImage(TemporaryStreamUploadRequest temporaryStreamUploadRequest, CancellationToken ct = default)
     {
-        if (temporaryStreamUploadRequest is null)
-            throw new ArgumentNullException(nameof(temporaryStreamUploadRequest), "Argument cannot be null");
-
-        if (temporaryStreamUploadRequest.FileName is null)
-            throw new ArgumentNullException(nameof(temporaryStreamUploadRequest.FileName), "Argument cannot be null");
+        Throw.IfNull(temporaryStreamUploadRequest);
+        Throw.IfNull(temporaryStreamUploadRequest.FileName);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.LitterboxUrl);
         using var content = new MultipartFormDataContent
