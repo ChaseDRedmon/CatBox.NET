@@ -28,7 +28,7 @@ public class CatBoxClient : ICatBoxClient
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<string?> UploadMultipleImages(FileUploadRequest fileUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
+    public async IAsyncEnumerable<string?> UploadFiles(FileUploadRequest fileUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
     {
         Throw.IfNull(fileUploadRequest);
 
@@ -54,29 +54,33 @@ public class CatBoxClient : ICatBoxClient
     }
     
     /// <inheritdoc/>
-    public async Task<string?> UploadImage(StreamUploadRequest fileUploadRequest, CancellationToken ct = default)
+    public async IAsyncEnumerable<string?> UploadFilesAsStream(IEnumerable<StreamUploadRequest> fileUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
     {
         Throw.IfNull(fileUploadRequest);
-        Throw.IfStringIsNullOrWhitespace(fileUploadRequest.FileName, "Argument cannot be null, empty, or whitespace");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
-        using var content = new MultipartFormDataContent
+        foreach (var uploadRequest in fileUploadRequest)
         {
-            { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
-            { new StreamContent(fileUploadRequest.Stream), RequestParameters.FileToUpload, fileUploadRequest.FileName }
-        };
+            Throw.IfStringIsNullOrWhitespace(uploadRequest.FileName, "Argument cannot be null, empty, or whitespace");
 
-        if (!string.IsNullOrWhiteSpace(fileUploadRequest.UserHash))
-            content.Add(new StringContent(fileUploadRequest.UserHash), RequestParameters.UserHash);
+            using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
+            using var content = new MultipartFormDataContent
+            {
+                { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
+                { new StreamContent(uploadRequest.Stream), RequestParameters.FileToUpload, uploadRequest.FileName }
+            };
+
+            if (!string.IsNullOrWhiteSpace(uploadRequest.UserHash))
+                content.Add(new StringContent(uploadRequest.UserHash), RequestParameters.UserHash);
         
-        request.Content = content;
+            request.Content = content;
 
-        using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncInternal(ct);
+            using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+            yield return await response.Content.ReadAsStringAsyncInternal(ct);
+        }
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<string?> UploadMultipleUrls(UrlUploadRequest urlUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
+    public async IAsyncEnumerable<string?> UploadFilesAsUrl(UrlUploadRequest urlUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
     {
         Throw.IfNull(urlUploadRequest);
 
@@ -223,7 +227,6 @@ public class CatBoxClient : ICatBoxClient
             { new StringContent(modifyAlbumImagesRequest.AlbumId), RequestParameters.AlbumIdShort }
         };
 
-        // If request type is AddToAlbum or RemoveFromAlbum
         if (modifyAlbumImagesRequest.Request is RequestType.AddToAlbum or RequestType.RemoveFromAlbum)
             content.Add(new StringContent(fileNames), RequestParameters.Files);
 

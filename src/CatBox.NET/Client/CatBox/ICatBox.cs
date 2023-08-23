@@ -13,23 +13,7 @@ public interface ICatBox
     /// <param name="requestFromFiles">Album Creation Request</param>
     /// <param name="ct">Cancellation Token.</param>
     /// <returns></returns>
-    Task<string?> CreateAlbumFromFiles(CreateAlbumRequestFromFiles requestFromFiles, CancellationToken ct = default);
-    
-    /// <summary>
-    /// Creates an album on CatBox from URLs that are specified in the request
-    /// </summary>
-    /// <param name="requestFromUrls">Album Creation Request</param>
-    /// <param name="ct">Cancellation Token.</param>
-    /// <returns></returns>
-    Task<string?> CreateAlbumFromUrls(CreateAlbumRequestFromUrls requestFromUrls, CancellationToken ct = default);
-    
-    /// <summary>
-    /// Creates an album on CatBox from files that are streamed to the API in the request
-    /// </summary>
-    /// <param name="requestFromStream">Album Creation Request</param>
-    /// <param name="ct">Cancellation Token.</param>
-    /// <returns></returns>
-    Task<string?> CreateAlbumFromFiles(CreateAlbumRequestFromStream requestFromStream, CancellationToken ct = default);
+    Task<string?> CreateAlbumFromFiles(CreateAlbumRequest requestFromFiles, CancellationToken ct = default);
     
     /// <summary>
     /// Upload and add images to an existing Catbox Album
