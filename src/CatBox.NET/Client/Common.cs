@@ -10,16 +10,16 @@ internal static class Common
     /// <summary>
     /// These file extensions are not allowed by the API, so filter them out
     /// </summary>
-    /// <param name="extension"></param>
+    /// <param name="fileExtension"></param>
     /// <returns><see cref="bool"/></returns>
-    public static bool IsFileExtensionValid(string extension)
+    public static bool IsFileExtensionValid(string fileExtension)
     {
-        switch (extension)
+        switch (fileExtension)
         {
             case ".exe":
             case ".scr":
             case ".cpl":
-            case var _ when extension.Contains(".doc"):
+            case var _ when fileExtension.Contains(".doc"):
             case ".jar":
                 return false;
             default:
