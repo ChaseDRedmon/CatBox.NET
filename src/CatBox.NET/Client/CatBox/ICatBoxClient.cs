@@ -79,12 +79,22 @@ public interface ICatBoxClient
     /// </summary>
     /// <param name="modifyAlbumImagesRequest">Data to pass to the API</param>
     /// <param name="ct">Cancellation Token</param>
-    /// <exception cref="ArgumentNullException"> when <see cref="ModifyAlbumImagesRequest"/> </exception>
+    /// <exception cref="ArgumentNullException"> when <see cref="ModifyAlbumImagesRequest"/> is null </exception>
     /// <exception cref="ArgumentNullException"> when <see cref="ModifyAlbumImagesRequest.UserHash"/> is null, empty, or whitespace</exception>
     /// <exception cref="ArgumentNullException"> when <see cref="ModifyAlbumImagesRequest.Files"/> is null, empty, or whitespace</exception>
     /// <exception cref="ArgumentException"> when <see cref="ModifyAlbumImagesRequest.Request"/> is not valid for this request type</exception>
-    /// <exception cref="InvalidOperationException"> when <see cref="ModifyAlbumImagesRequest.Request"/> is not CatBoxRequestTypes.AddToAlbum, CatBoxRequestTypes.RemoveFromAlbum, CatBoxRequestTypes.DeleteAlbum</exception>
+    /// <exception cref="InvalidOperationException"> when <see cref="ModifyAlbumImagesRequest.Request"/> is not
+    /// <see cref="CatBox.NET.Enums.RequestType.AddToAlbum"/>,
+    /// <see cref="CatBox.NET.Enums.RequestType.RemoveFromAlbum"/>,
+    /// or <see cref="CatBox.NET.Enums.RequestType.DeleteAlbum"/> 
+    /// </exception>
     /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
     /// <returns>Response string from the API</returns>
+    /// <remarks>
+    /// The ModifyAlbum method only supports the following request types / verbs: <br/>
+    /// <see cref="CatBox.NET.Enums.RequestType.AddToAlbum"/> <br/>
+    /// <see cref="CatBox.NET.Enums.RequestType.RemoveFromAlbum"/> <br/>
+    /// <see cref="CatBox.NET.Enums.RequestType.DeleteAlbum"/> . <br/> <br/>
+    /// Use <see cref="ICatBoxClient.EditAlbum"/> to edit an album</remarks>
     Task<string?> ModifyAlbum(ModifyAlbumImagesRequest modifyAlbumImagesRequest, CancellationToken ct = default);
 }

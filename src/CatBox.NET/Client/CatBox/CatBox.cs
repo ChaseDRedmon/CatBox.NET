@@ -10,7 +10,7 @@ public sealed class Catbox : ICatBox
     /// <summary>
     /// Instantiate a new catbox class 
     /// </summary>
-    /// <param name="client">The CatBox Api Client</param>
+    /// <param name="client">The CatBox Api Client (<see cref="ICatBoxClient"/>)</param>
     public Catbox(ICatBoxClient client)
     {
         _client = client;
