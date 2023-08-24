@@ -21,12 +21,11 @@ public class CatBoxClient : ICatBoxClient
     /// <remarks>"CatBox API URL cannot be null. Check that URL was set by calling: <br/><code>.AddCatBoxServices(f => f.CatBoxUrl = new Uri("https://catbox.moe/user/api.php"));</code></remarks>
     public CatBoxClient(HttpClient client, IOptions<CatboxOptions> catboxOptions)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client), "HttpClient cannot be null");
-
-        if (catboxOptions.Value.CatBoxUrl is null)
-            throw new ArgumentNullException(nameof(catboxOptions.Value.CatBoxUrl), "CatBox API URL cannot be null. Check that URL was set by calling .AddCatBoxServices(f => f.CatBoxUrl = new Uri(\"https://catbox.moe/user/api.php\"))");
-
-        _catboxOptions = catboxOptions.Value;
+        Throw.IfNull(client);
+        Throw.IfNull(catboxOptions?.Value?.CatBoxUrl);
+        
+        _client = client;
+        _catboxOptions = catboxOptions!.Value!;
     }
 
     /// <inheritdoc/>
@@ -86,10 +85,8 @@ public class CatBoxClient : ICatBoxClient
     {
         Throw.IfNull(urlUploadRequest);
 
-        foreach (var fileUrl in urlUploadRequest.Files)
+        foreach (var fileUrl in urlUploadRequest.Files.Where(f => f is not null))
         {
-            if (fileUrl is null) continue;
-            
             using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
             using var content = new MultipartFormDataContent // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
             {
@@ -204,7 +201,7 @@ public class CatBoxClient : ICatBoxClient
         Throw.IfNull(modifyAlbumImagesRequest);
         Throw.IfStringIsNullOrWhitespace(modifyAlbumImagesRequest.UserHash, "UserHash cannot be null, empty, or whitespace when attempting to modify an album");
         
-        if (IsAlbumRequestTypeValid(modifyAlbumImagesRequest))
+        if (!IsAlbumRequestTypeValid(modifyAlbumImagesRequest))
 #pragma warning disable CA2208 // Instantiate argument exceptions correctly
             throw new ArgumentException("Invalid Request Type for album endpoint", nameof(modifyAlbumImagesRequest.Request));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
