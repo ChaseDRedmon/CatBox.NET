@@ -21,12 +21,11 @@ public class LitterboxClient : ILitterboxClient
     /// <remarks>LitterboxUrl API URL cannot be null. Check that URL was set by calling: <br/><code>.AddCatBoxServices(f => f.LitterboxUrl = new Uri(\"https://litterbox.catbox.moe/resources/internals/api.php\"));</code></remarks>
     public LitterboxClient(HttpClient client, IOptions<CatboxOptions> catboxOptions)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client), "HttpClient cannot be null");
+        Throw.IfNull(client);
+        Throw.IfNull(catboxOptions?.Value?.LitterboxUrl);
 
-        if (catboxOptions.Value.LitterboxUrl is null)
-            throw new ArgumentNullException(nameof(catboxOptions.Value.CatBoxUrl), "CatBox API URL cannot be null. Check that URL was set by calling .AddCatBoxServices(f => f.CatBoxUrl = new Uri(\"https://litterbox.catbox.moe/resources/internals/api.php\"))");
-
-        _catboxOptions = catboxOptions.Value;
+        _client = client;
+        _catboxOptions = catboxOptions!.Value!;
     }
     
     /// <inheritdoc/>
@@ -55,13 +54,12 @@ public class LitterboxClient : ILitterboxClient
     /// <inheritdoc/>
     public async Task<string?> UploadImage(TemporaryStreamUploadRequest temporaryStreamUploadRequest, CancellationToken ct = default)
     {
-        Throw.IfNull(temporaryStreamUploadRequest);
-        Throw.IfNull(temporaryStreamUploadRequest.FileName);
+        Throw.IfNull(temporaryStreamUploadRequest?.FileName);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.LitterboxUrl);
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(temporaryStreamUploadRequest.Expiry.Value()), RequestParameters.Expiry },
+            { new StringContent(temporaryStreamUploadRequest!.Expiry.Value()), RequestParameters.Expiry },
             { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
             { new StreamContent(temporaryStreamUploadRequest.Stream), RequestParameters.FileToUpload, temporaryStreamUploadRequest.FileName }
         };
