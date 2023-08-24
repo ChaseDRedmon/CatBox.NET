@@ -16,7 +16,9 @@ public class LitterboxClient : ILitterboxClient
     /// </summary>
     /// <param name="client"><see cref="HttpClient"/></param>
     /// <param name="catboxOptions"><see cref="IOptions{TOptions}"/></param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException"> when <see cref="HttpClient"/> is null</exception>
+    /// /// <exception cref="ArgumentNullException"> when <see cref="CatboxOptions.LitterboxUrl"/> is null</exception>
+    /// <remarks>LitterboxUrl API URL cannot be null. Check that URL was set by calling: <br/><code>.AddCatBoxServices(f => f.LitterboxUrl = new Uri(\"https://litterbox.catbox.moe/resources/internals/api.php\"));</code></remarks>
     public LitterboxClient(HttpClient client, IOptions<CatboxOptions> catboxOptions)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client), "HttpClient cannot be null");

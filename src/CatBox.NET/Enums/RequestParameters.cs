@@ -1,5 +1,8 @@
 ﻿namespace CatBox.NET.Enums;
 
+/// <summary>
+/// API Request parameters for request content and request types
+/// </summary>
 internal static class RequestParameters
 {
     /// <summary>

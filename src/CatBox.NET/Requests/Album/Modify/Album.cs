@@ -18,7 +18,7 @@ public abstract record Album
     public required string UserHash { get; init; }
 
     /// <summary>
-    /// The unique identifier for the album
+    /// The unique identifier for the album (API value: "short")
     /// </summary>
     public required string AlbumId { get; init; }
 }

@@ -16,7 +16,9 @@ public class CatBoxClient : ICatBoxClient
     /// </summary>
     /// <param name="client"><see cref="HttpClient"/></param>
     /// <param name="catboxOptions"><see cref="IOptions{TOptions}"/></param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException"><see cref="HttpClient"/> cannot be null</exception>
+    /// <exception cref="ArgumentNullException"><see cref="CatboxOptions.CatBoxUrl"/> cannot be null</exception>
+    /// <remarks>"CatBox API URL cannot be null. Check that URL was set by calling: <br/><code>.AddCatBoxServices(f => f.CatBoxUrl = new Uri("https://catbox.moe/user/api.php"));</code></remarks>
     public CatBoxClient(HttpClient client, IOptions<CatboxOptions> catboxOptions)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client), "HttpClient cannot be null");
@@ -60,7 +62,7 @@ public class CatBoxClient : ICatBoxClient
 
         foreach (var uploadRequest in fileUploadRequest)
         {
-            Throw.IfStringIsNullOrWhitespace(uploadRequest.FileName, "Argument cannot be null, empty, or whitespace");
+            Throw.IfStringIsNullOrWhitespace(uploadRequest.FileName, "FileName cannot be null, empty, or whitespace when attempting to upload files");
 
             using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.CatBoxUrl);
             using var content = new MultipartFormDataContent
@@ -109,7 +111,7 @@ public class CatBoxClient : ICatBoxClient
     public async Task<string?> DeleteMultipleFiles(DeleteFileRequest deleteFileRequest, CancellationToken ct = default)
     {
         Throw.IfNull(deleteFileRequest);
-        Throw.IfStringIsNullOrWhitespace(deleteFileRequest.UserHash, "Argument cannot be null, empty, or whitespace");
+        Throw.IfStringIsNullOrWhitespace(deleteFileRequest.UserHash, "UserHash cannot be null, empty, or whitespace when attempting to delete files");
 
         var fileNames = string.Join(" ", deleteFileRequest.FileNames);
         Throw.IfStringIsNullOrWhitespace(fileNames, "File list cannot be empty");
@@ -211,9 +213,7 @@ public class CatBoxClient : ICatBoxClient
             modifyAlbumImagesRequest.Request != RequestType.RemoveFromAlbum &&
             modifyAlbumImagesRequest.Request != RequestType.DeleteAlbum)
         {
-            throw new InvalidOperationException(
-                "The ModifyAlbum method only supports CatBoxRequestTypes.AddToAlbum, CatBoxRequestTypes.RemoveFromAlbum, and CatBoxRequestTypes.DeleteAlbum. " +
-                "Use Task<string?> EditAlbum(EditAlbumRequest? editAlbumRequest, CancellationToken ct = default) to edit an album");
+            throw new InvalidOperationException("Invalid Request Type for album endpoint");
         }
 
         var fileNames = string.Join(" ", modifyAlbumImagesRequest.Files);

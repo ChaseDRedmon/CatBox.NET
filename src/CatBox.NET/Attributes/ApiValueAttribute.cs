@@ -14,6 +14,7 @@ public sealed class ApiValueAttribute : Attribute
     /// <summary>
     /// Initializes a new instance of the <see cref='System.ComponentModel.DescriptionAttribute'/> class.
     /// </summary>
+    /// <param name="apiValue">Represents the CatBox API verb or parameter value</param>
     public ApiValueAttribute(string apiValue)
     {
         ApiValue = apiValue;
