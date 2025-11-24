@@ -4,7 +4,8 @@
 
 version: "1.0"
 linter: jetbrains/qodana-cdnet:latest
-solution: CatBox.NET.sln
+dotnet:
+  solution: CatBox.NET.sln
 profile:
   name: qodana.recommended
 include:

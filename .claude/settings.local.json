@@ -24,7 +24,8 @@
       "Bash(git commit:*)",
       "Bash(git reset:*)",
       "Bash(git add:*)",
-      "Bash(dotnet new:*)"
+      "Bash(dotnet new:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
