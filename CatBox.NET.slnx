@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/SampleApp/SampleApp.csproj"/>
+  </Folder>
+  <Folder Name="/Solution/">
+    <File Path=".editorconfig"/>
+    <File Path=".github/workflows/release.yml"/>
+    <File Path=".github/workflows/qodana_code_quality.yml"/>
+    <File Path=".gitignore"/>
+    <File Path="qodana.yaml"/>
+    <File Path="CLAUDE.md"/>
+    <File Path="license.txt"/>
+    <File Path="readme.md"/>
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/CatBox.NET/CatBox.NET.csproj"/>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CatBox.Tests/CatBox.Tests.csproj"/>
+  </Folder>
+</Solution>

@@ -3,7 +3,10 @@
 ####################################################################################################################
 
 version: "1.0"
-linter: jetbrains/qodana-cdnet:2025.2
+linter: jetbrains/qodana-cdnet:latest
+bootstrap: curl -fsSL https://dot.net/v1/dotnet-install.sh | bash -s -- --jsonfile /data/project/global.json -i /usr/share/dotnet
+dotnet:
+  solution: CatBox.NET.sln
 profile:
   name: qodana.recommended
 include:

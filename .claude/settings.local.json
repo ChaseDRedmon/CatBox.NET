@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Rider__list_directory_tree",
+      "mcp__Rider__find_files_by_name_keyword",
+      "mcp__Rider__get_run_configurations",
+      "mcp__Rider__search_in_files_by_text",
+      "Bash(dotnet build:*)",
+      "mcp__fetch__fetch",
+      "Bash(dotnet test:*)",
+      "mcp__Rider__get_file_text_by_path",
+      "mcp__sequentialthinking__sequentialthinking",
+      "mcp__MicrosoftLearn__microsoft_docs_search",
+      "mcp__MicrosoftLearn__microsoft_docs_fetch",
+      "mcp__Rider__replace_text_in_file",
+      "Bash(dir:*)",
+      "WebSearch",
+      "Bash(dotnet --version:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(dotnet add:*)",
+      "mcp__MicrosoftLearn__microsoft_code_sample_search",
+      "Bash(del \"C:\\Coding\\CSharp\\Personal\\Libraries\\CatBox.NET\\src\\CatBox.NET\\Client\\Helpers.cs\")",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git add:*)",
+      "Bash(dotnet new:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

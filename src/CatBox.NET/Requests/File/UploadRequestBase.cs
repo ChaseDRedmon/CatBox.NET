@@ -1,0 +1,12 @@
+﻿namespace CatBox.NET.Requests.File;
+
+/// <summary>
+/// A base record for all file upload requests where the UserHash is optional
+/// </summary>
+public abstract record UploadRequestBase
+{
+    /// <summary>
+    /// The UserHash associated with this file upload
+    /// </summary>
+    public string? UserHash { get; init; }
+}
