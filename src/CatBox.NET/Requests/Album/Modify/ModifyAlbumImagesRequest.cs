@@ -1,9 +1,9 @@
-﻿namespace CatBox.NET.Requests.CatBox;
+﻿namespace CatBox.NET.Requests.Album.Modify;
 
 /// <summary>
-/// Wraps a request to add files, remove files, or delete an album
+/// Wraps a requestBase to add files, remove files, or delete an album
 /// </summary>
-public sealed record ModifyAlbumImagesRequest : Album
+public sealed record ModifyAlbumImagesRequest : AlbumBase
 {
     /// <summary>
     /// The list of files associated with the album

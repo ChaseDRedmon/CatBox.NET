@@ -1,9 +1,9 @@
-﻿namespace CatBox.NET.Requests.CatBox;
+﻿namespace CatBox.NET.Requests.File;
 
 /// <summary>
 /// Wraps multiple files to upload to the API
 /// </summary>
-public sealed record FileUploadRequest : UploadRequest
+public sealed record FileUploadRequest : UploadRequestBase
 {
     /// <summary>
     /// A collection of files paths to upload

@@ -1,10 +1,10 @@
-﻿namespace CatBox.NET.Requests.CatBox;
+﻿namespace CatBox.NET.Requests.Album;
 
 /// <summary>
-/// Wraps a request to edit an existing album with new files, new title, new description
+/// Wraps a requestBase to edit an existing album with new files, new title, new description
 /// </summary>
 /// <remarks>
-/// This sets command sets the album to mirror the content in this request
+/// This sets command sets the album to mirror the content in this requestBase
 /// </remarks>
 [Obsolete("Warning! This is a Powerful and Dangerous command. You can irreversibly destroy albums with this command if you do not understand how this command works!")]
 public sealed record EditAlbumRequest
