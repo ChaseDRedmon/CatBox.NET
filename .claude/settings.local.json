@@ -23,7 +23,8 @@
       "Bash(del \"C:\\Coding\\CSharp\\Personal\\Libraries\\CatBox.NET\\src\\CatBox.NET\\Client\\Helpers.cs\")",
       "Bash(git commit:*)",
       "Bash(git reset:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(dotnet new:*)"
     ],
     "deny": [],
     "ask": []
