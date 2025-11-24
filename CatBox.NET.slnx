@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/Solution/">
     <File Path=".editorconfig" />
+    <File Path=".github/workflows/release.yml" />
     <File Path=".gitignore" />
     <File Path="CLAUDE.md" />
     <File Path="license.txt" />

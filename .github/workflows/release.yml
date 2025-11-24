@@ -1,0 +1,48 @@
+﻿name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - 'v*'  # e.g., v1.0.0, v1.2.3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Install .NET 10 SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      # 3. Extract version number from Git tag
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+
+      # 4. Restore dependencies for the library
+      - name: Restore library dependencies
+        run: dotnet restore src/CatBox.NET/CatBox.NET.csproj
+
+      # 5. Build the library
+      - name: Build library
+        run: dotnet build src/CatBox.NET/CatBox.NET.csproj --configuration Release --no-restore
+
+      # 6. Run tests (pointing to your test project)
+      - name: Run tests
+        run: dotnet test tests/CatBox.Tests/CatBox.Tests.csproj --configuration Release --no-build
+
+      # 7. Pack the NuGet package
+      - name: Pack NuGet package
+        run: dotnet pack src/CatBox.NET/CatBox.NET.csproj --configuration Release --no-build -o ./artifacts /p:PackageVersion=${{ env.PACKAGE_VERSION }}
+
+      # 8. Publish package to nuget.org
+      - name: Publish NuGet package
+        run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
