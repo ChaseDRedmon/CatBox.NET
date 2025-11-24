@@ -1,13 +1,39 @@
 ﻿using System.Runtime.CompilerServices;
 using CatBox.NET.Enums;
+using CatBox.NET.Requests.File;
 using CatBox.NET.Requests.Litterbox;
 using Microsoft.Extensions.Options;
 using static CatBox.NET.Client.Common;
 
 namespace CatBox.NET.Client;
 
-public class LitterboxClient : ILitterboxClient
+public interface ILitterboxClient
 {
+    /// <summary>
+    /// Enables uploading multiple files from disk (FileStream) to the API
+    /// </summary>
+    /// <param name="temporaryFileUploadRequest"></param>
+    /// <param name="ct">Cancellation Token</param>
+    /// <exception cref="ArgumentNullException">When <see cref="FileUploadRequest"/> is null</exception>
+    /// <returns>Response string from the API</returns>
+    IAsyncEnumerable<string?> UploadMultipleImagesAsync(TemporaryFileUploadRequest temporaryFileUploadRequest, CancellationToken ct = default);
+
+    /// <summary>
+    /// Streams a single image to be uploaded
+    /// </summary>
+    /// <param name="temporaryStreamUploadRequest"></param>
+    /// <param name="ct">Cancellation Token</param>
+    /// <exception cref="ArgumentNullException">When <see cref="StreamUploadRequest"/> is null</exception>
+    /// <exception cref="ArgumentNullException">When <see cref="StreamUploadRequest.FileName"/> is null</exception>
+    /// <exception cref="HttpRequestException"> when something bad happens when talking to the API</exception>
+    /// <returns>Response string from the API</returns>
+    Task<string?> UploadImageAsync(TemporaryStreamUploadRequest temporaryStreamUploadRequest, CancellationToken ct = default);
+}
+
+public sealed class LitterboxClient : ILitterboxClient
+{
+    private const long MaxFileSize = 1_073_741_824L; // 1GB in bytes
+
     private readonly HttpClient _client;
     private readonly CatboxOptions _catboxOptions;
 
@@ -21,51 +47,53 @@ public class LitterboxClient : ILitterboxClient
     /// <remarks>LitterboxUrl API URL cannot be null. Check that URL was set by calling: <br/><code>.AddCatBoxServices(f => f.LitterboxUrl = new Uri(\"https://litterbox.catbox.moe/resources/internals/api.php\"));</code></remarks>
     public LitterboxClient(HttpClient client, IOptions<CatboxOptions> catboxOptions)
     {
-        Throw.IfNull(client);
-        Throw.IfNull(catboxOptions?.Value?.LitterboxUrl);
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(catboxOptions?.Value?.LitterboxUrl);
 
         _client = client;
         _catboxOptions = catboxOptions!.Value!;
     }
     
     /// <inheritdoc/>
-    public async IAsyncEnumerable<string?> UploadMultipleImages(TemporaryFileUploadRequest temporaryFileUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
+    public async IAsyncEnumerable<string?> UploadMultipleImagesAsync(TemporaryFileUploadRequest temporaryFileUploadRequest, [EnumeratorCancellation] CancellationToken ct = default)
     {
-        Throw.IfNull(temporaryFileUploadRequest);
+        ArgumentNullException.ThrowIfNull(temporaryFileUploadRequest);
 
-        foreach (var imageFile in temporaryFileUploadRequest.Files.Where(static f => IsFileExtensionValid(f.Extension)))
+        foreach (var imageFile in temporaryFileUploadRequest.Files.Where(IsFileExtensionValid))
         {
             await using var fileStream = File.OpenRead(imageFile.FullName);
-            
-            using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.LitterboxUrl);
-            using var content = new MultipartFormDataContent
-            {
-                { new StringContent(temporaryFileUploadRequest.Expiry.Value()), RequestParameters.Expiry },
-                { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
-                { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
-            };
-            request.Content = content;
 
-            using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            yield return await response.Content.ReadAsStringAsyncInternal(ct);
+            Throw.IfLitterboxFileSizeExceeds(fileStream.Length, MaxFileSize);
+
+            using var response = await _client.PostAsync(_catboxOptions.LitterboxUrl, new MultipartFormDataContent
+            {
+                { new StringContent(RequestType.UploadFile.Value), RequestParameters.Request },
+                { new StringContent(temporaryFileUploadRequest.Expiry.Value), RequestParameters.Expiry },
+                { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
+            }, ct);
+            
+            yield return await response.Content.ReadAsStringAsync(ct);
         }
     }
     
     /// <inheritdoc/>
-    public async Task<string?> UploadImage(TemporaryStreamUploadRequest temporaryStreamUploadRequest, CancellationToken ct = default)
+    public async Task<string?> UploadImageAsync(TemporaryStreamUploadRequest temporaryStreamUploadRequest, CancellationToken ct = default)
     {
-        Throw.IfNull(temporaryStreamUploadRequest?.FileName);
+        ArgumentNullException.ThrowIfNull(temporaryStreamUploadRequest?.FileName);
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _catboxOptions.LitterboxUrl);
-        using var content = new MultipartFormDataContent
+        if (temporaryStreamUploadRequest!.Stream.CanSeek)
+            Throw.IfLitterboxFileSizeExceeds(temporaryStreamUploadRequest.Stream.Length, MaxFileSize);
+
+        using var response = await _client.PostAsync(_catboxOptions.LitterboxUrl, new MultipartFormDataContent
         {
-            { new StringContent(temporaryStreamUploadRequest!.Expiry.Value()), RequestParameters.Expiry },
-            { new StringContent(RequestType.UploadFile.Value()), RequestParameters.Request },
-            { new StreamContent(temporaryStreamUploadRequest.Stream), RequestParameters.FileToUpload, temporaryStreamUploadRequest.FileName }
-        };
-        request.Content = content;
-
-        using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-        return await response.Content.ReadAsStringAsyncInternal(ct);
+            { new StringContent(RequestType.UploadFile.Value), RequestParameters.Request },
+            { new StringContent(temporaryStreamUploadRequest!.Expiry.Value), RequestParameters.Expiry },
+            {
+                new StreamContent(temporaryStreamUploadRequest.Stream), RequestParameters.FileToUpload,
+                temporaryStreamUploadRequest.FileName
+            }
+        }, ct);
+        
+        return await response.Content.ReadAsStringAsync(ct);
     }
 }

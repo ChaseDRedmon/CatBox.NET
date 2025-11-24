@@ -1,6 +1,30 @@
-﻿using CatBox.NET.Requests.CatBox;
+﻿using CatBox.NET.Requests.Album;
+using CatBox.NET.Requests.Album.Create;
+using CatBox.NET.Requests.Album.Modify;
 
 namespace CatBox.NET.Client;
+
+/// <summary>
+/// Provides an abstraction over <see cref="CatBoxClient"/> to group multiple tasks together
+/// </summary>
+public interface ICatBox
+{
+    /// <summary>
+    /// Creates an album on CatBox from files that are uploaded in the requestBase
+    /// </summary>
+    /// <param name="requestFromFiles">Album Creation Request</param>
+    /// <param name="ct">Cancellation Token.</param>
+    /// <returns></returns>
+    Task<string?> CreateAlbumFromFilesAsync(CreateAlbumRequest requestFromFiles, CancellationToken ct = default);
+
+    /// <summary>
+    /// Upload and add images to an existing Catbox Album
+    /// </summary>
+    /// <param name="request">Album Creation Request</param>
+    /// <param name="ct">Cancellation Token.</param>
+    /// <returns></returns>
+    Task<string?> UploadImagesToAlbumAsync(UploadToAlbumRequest request, CancellationToken ct = default);
+}
 
 /// <inheritdoc/>
 public sealed class Catbox : ICatBox
@@ -17,10 +41,10 @@ public sealed class Catbox : ICatBox
     }
     
     /// <inheritdoc/>
-    public async Task<string?> CreateAlbumFromFiles(CreateAlbumRequest requestFromFiles, CancellationToken ct = default)
+    public Task<string?> CreateAlbumFromFilesAsync(CreateAlbumRequest requestFromFiles, CancellationToken ct = default)
     {
         var enumerable = Upload(requestFromFiles, ct);
-        
+
         var createAlbumRequest = new RemoteCreateAlbumRequest
         {
             Title = requestFromFiles.Title,
@@ -29,11 +53,11 @@ public sealed class Catbox : ICatBox
             Files = enumerable.ToBlockingEnumerable(cancellationToken: ct)
         };
 
-        return await _client.CreateAlbum(createAlbumRequest, ct);
+        return _client.CreateAlbumAsync(createAlbumRequest, ct);
     }
     
     /// <inheritdoc/>
-    public async Task<string?> UploadImagesToAlbum(UploadToAlbumRequest request, CancellationToken ct = default)
+    public Task<string?> UploadImagesToAlbumAsync(UploadToAlbumRequest request, CancellationToken ct = default)
     {
         var requestType = request.Request;
         var userHash = request.UserHash;
@@ -41,7 +65,7 @@ public sealed class Catbox : ICatBox
 
         var enumerable = Upload(request, ct);
 
-        return await _client.ModifyAlbum(new ModifyAlbumImagesRequest
+        return _client.ModifyAlbumAsync(new ModifyAlbumImagesRequest
         {
             Request = requestType,
             UserHash = userHash,
@@ -49,15 +73,22 @@ public sealed class Catbox : ICatBox
             Files = enumerable.ToBlockingEnumerable()
         }, ct);
     }
-
+    
+    /// <summary>
+    /// Upload files based on the requestBase type
+    /// </summary>
+    /// <param name="request">Upload requestBase type</param>
+    /// <param name="ct">Cancellation Token</param>
+    /// <returns>API Response</returns>
+    /// <exception cref="InvalidOperationException">When passing in an invalid requestBase type</exception>
     private IAsyncEnumerable<string?> Upload(IAlbumUploadRequest request, CancellationToken ct = default)
     {
         return request.UploadRequest switch
         {
-            { IsFirst: true } => _client.UploadFiles(request.UploadRequest, ct),
-            { IsSecond: true } => _client.UploadFilesAsStream(request.UploadRequest.Second, ct),
-            { IsThird: true } => _client.UploadFilesAsUrl(request.UploadRequest, ct),
-            _ => throw new InvalidOperationException("Invalid request type")
+            { IsFirst: true } => _client.UploadFilesAsync(request.UploadRequest, ct),
+            { IsSecond: true } => _client.UploadFilesAsStreamAsync(request.UploadRequest.Second, ct),
+            { IsThird: true } => _client.UploadFilesAsUrlAsync(request.UploadRequest, ct),
+            _ => throw new InvalidOperationException("Invalid requestBase type")
         };
     }
 }

@@ -1,7 +1,7 @@
-﻿using System.Text;
-using BetterEnumsGen;
+﻿using System.Diagnostics.CodeAnalysis;
 using CatBox.NET.Enums;
-using CatBox.NET.Requests.CatBox;
+using CatBox.NET.Requests.Album.Create;
+using CatBox.NET.Requests.Album.Modify;
 
 namespace CatBox.NET.Client;
 
@@ -10,57 +10,31 @@ internal static class Common
     /// <summary>
     /// These file extensions are not allowed by the API, so filter them out
     /// </summary>
-    /// <param name="fileExtension"></param>
-    /// <returns><see cref="bool"/></returns>
-    public static bool IsFileExtensionValid(string fileExtension)
+    /// <param name="file">The file to validate</param>
+    /// <returns><see langword="true"/> if the file extension is valid; otherwise, <see langword="false"/></returns>
+    public static bool IsFileExtensionValid(FileInfo file)
     {
-        switch (fileExtension)
+        var extension = file.Extension;
+        return extension switch
         {
-            case ".exe":
-            case ".scr":
-            case ".cpl":
-            case var _ when fileExtension.Contains(".doc"):
-            case ".jar":
-                return false;
-            default:
-                return true;
-        }
+            ".exe" or ".scr" or ".cpl" or ".jar" => false,
+            _ when extension.Contains(".doc") => false,
+            _ => true
+        };
     }
-    
-    public static Task<string> ReadAsStringAsyncInternal(this HttpContent content, CancellationToken ct = default)
-    {
-#if NET5_0_OR_GREATER
-        return content.ReadAsStringAsync(ct);
-#else
-        return content.ReadAsStringAsync();
-#endif
-    }
-    
-    public static async Task<string> ToStringAsync(this IAsyncEnumerable<string?> asyncEnumerable, CancellationToken ct = default)
-    {
-        Throw.IfNull(asyncEnumerable);
 
-        var builder = new StringBuilder();
-        await foreach (var s in asyncEnumerable.WithCancellation(ct))
-        {
-            builder.Append(s).Append(' ');
-        }
-
-        return builder.ToString();
-    }
-    
     /// <summary>
     /// Validates an Album Creation Request
     /// </summary>
-    /// <param name="request">The album creation request to validate</param>
-    /// <exception cref="ArgumentNullException">when the request is null</exception>
+    /// <param name="requestBase">The album creation requestBase to validate</param>
+    /// <exception cref="ArgumentNullException">when the requestBase is null</exception>
     /// <exception cref="ArgumentNullException">when the description is null</exception>
     /// <exception cref="ArgumentNullException">when the title is null</exception>
-    public static void ThrowIfAlbumCreationRequestIsInvalid(AlbumCreationRequest request)
+    public static void ThrowIfAlbumCreationRequestIsInvalid(AlbumCreationRequestBase requestBase)
     {
-        Throw.IfNull(request);
-        Throw.IfStringIsNullOrWhitespace(request.Description, "Album description cannot be null, empty, or whitespace");
-        Throw.IfStringIsNullOrWhitespace(request.Title, "Album title cannot be null, empty, or whitespace");
+        ArgumentNullException.ThrowIfNull(requestBase);
+        ArgumentException.ThrowIfNullOrWhiteSpace(requestBase.Description);
+        ArgumentException.ThrowIfNullOrWhiteSpace(requestBase.Title);
     }
     
     /// <summary>
@@ -71,24 +45,15 @@ internal static class Common
     /// <returns></returns>
     public static bool IsAlbumRequestTypeValid(ModifyAlbumImagesRequest imagesRequest)
     {
-        switch (imagesRequest.Request)
-        {
-            case RequestType.CreateAlbum:
-            case RequestType.EditAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-            case RequestType.AddToAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-            case RequestType.RemoveFromAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-            case RequestType.DeleteAlbum when !string.IsNullOrWhiteSpace(imagesRequest.UserHash):
-                return true;
+        var request = imagesRequest.Request;
+        var hasUserHash = !string.IsNullOrWhiteSpace(imagesRequest.UserHash);
 
-            case RequestType.UploadFile:
-            case RequestType.UrlUpload:
-            case RequestType.DeleteFile:
-            default:
-                return false;
-        }
+        if (request == RequestType.CreateAlbum)
+            return true;
+
+        return (request == RequestType.EditAlbum ||
+                request == RequestType.AddToAlbum ||
+                request == RequestType.RemoveFromAlbum ||
+                request == RequestType.DeleteAlbum) && hasUserHash;
     }
-    
-    // Shortening GetApiValue().ApiValue method call -> GetValue()
-    public static string Value(this RequestType type) => type.GetApiValue()!.ApiValue;
-    public static string Value(this ExpireAfter expireAfter) => expireAfter.GetApiValue()!.ApiValue;
 }
