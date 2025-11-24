@@ -1,10 +1,10 @@
-﻿using System.Net;
+using System.Net;
 using Microsoft.Extensions.Logging;
 
 namespace CatBox.NET.Logging;
 
-public static class LoggerExtensions
+public static partial class LoggerExtensions
 {
-    private static readonly Action<ILogger, HttpStatusCode, string, Exception> _logCatBoxException = LoggerMessage.Define<HttpStatusCode, string>(LogLevel.Error, new EventId(1000, "CatBox API"), "HttpStatus: {StatusCode} - {Message}");
-    public static void LogCatBoxAPIException(this ILogger logger, HttpStatusCode code, string apiMessage) => _logCatBoxException(logger, code, apiMessage, default!);
+    [LoggerMessage(EventId = 1000, Level = LogLevel.Error, Message = "HttpStatus: {StatusCode} - {Message}")]
+    public static partial void LogCatBoxAPIException(this ILogger logger, HttpStatusCode statusCode, string message);
 }
