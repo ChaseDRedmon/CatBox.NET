@@ -5,7 +5,7 @@ namespace CatBox.NET.Enums;
 /// <summary>
 /// Image expiry in litterbox.moe
 /// </summary>
-[Intellenum(typeof(string))]
+[Intellenum<string>(Conversions.TypeConverter)]
 [Member("OneHour", "1h")]
 [Member("TwelveHours", "12h")]
 [Member("OneDay", "24h")]

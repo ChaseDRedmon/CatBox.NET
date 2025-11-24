@@ -67,8 +67,8 @@ public sealed class LitterboxClient : ILitterboxClient
 
             using var response = await _client.PostAsync(_catboxOptions.LitterboxUrl, new MultipartFormDataContent
             {
-                { new StringContent(RequestType.UploadFile.Value), RequestParameters.Request },
-                { new StringContent(temporaryFileUploadRequest.Expiry.Value), RequestParameters.Expiry },
+                { new StringContent(RequestType.UploadFile), RequestParameters.Request },
+                { new StringContent(temporaryFileUploadRequest.Expiry), RequestParameters.Expiry },
                 { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
             }, ct);
             
@@ -86,8 +86,8 @@ public sealed class LitterboxClient : ILitterboxClient
 
         using var response = await _client.PostAsync(_catboxOptions.LitterboxUrl, new MultipartFormDataContent
         {
-            { new StringContent(RequestType.UploadFile.Value), RequestParameters.Request },
-            { new StringContent(temporaryStreamUploadRequest!.Expiry.Value), RequestParameters.Expiry },
+            { new StringContent(RequestType.UploadFile), RequestParameters.Request },
+            { new StringContent(temporaryStreamUploadRequest!.Expiry), RequestParameters.Expiry },
             {
                 new StreamContent(temporaryStreamUploadRequest.Stream), RequestParameters.FileToUpload,
                 temporaryStreamUploadRequest.FileName

@@ -145,7 +145,7 @@ public sealed class CatBoxClient : ICatBoxClient
 
             using var content = new MultipartFormDataContent
             {
-                { new StringContent(RequestType.UploadFile.Value), RequestParameters.Request },
+                { new StringContent(RequestType.UploadFile), RequestParameters.Request },
                 { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
             };
 
@@ -171,7 +171,7 @@ public sealed class CatBoxClient : ICatBoxClient
 
             using var content = new MultipartFormDataContent
             {
-                { new StringContent(RequestType.UploadFile.Value), RequestParameters.Request },
+                { new StringContent(RequestType.UploadFile), RequestParameters.Request },
                 { new StreamContent(uploadRequest.Stream), RequestParameters.FileToUpload, uploadRequest.FileName }
             };
 
@@ -192,7 +192,7 @@ public sealed class CatBoxClient : ICatBoxClient
         {
             using var content = new MultipartFormDataContent // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
             {
-                { new StringContent(RequestType.UrlUpload.Value), RequestParameters.Request },
+                { new StringContent(RequestType.UrlUpload), RequestParameters.Request },
                 { new StringContent(fileUrl.AbsoluteUri), RequestParameters.Url }
             };
 
@@ -215,7 +215,7 @@ public sealed class CatBoxClient : ICatBoxClient
 
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(RequestType.DeleteFile.Value), RequestParameters.Request },
+            { new StringContent(RequestType.DeleteFile), RequestParameters.Request },
             { new StringContent(deleteFileRequest.UserHash), RequestParameters.UserHash },
             { new StringContent(fileNames), RequestParameters.Files }
         };
@@ -244,7 +244,7 @@ public sealed class CatBoxClient : ICatBoxClient
 
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(RequestType.CreateAlbum.Value), RequestParameters.Request },
+            { new StringContent(RequestType.CreateAlbum), RequestParameters.Request },
             { new StringContent(remoteCreateAlbumRequest.Title), RequestParameters.Title },
             { new StringContent(fileNames), RequestParameters.Files }
         };
@@ -275,7 +275,7 @@ public sealed class CatBoxClient : ICatBoxClient
 
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(RequestType.EditAlbum.Value), RequestParameters.Request },
+            { new StringContent(RequestType.EditAlbum), RequestParameters.Request },
             { new StringContent(editAlbumRequest.UserHash), RequestParameters.UserHash },
             { new StringContent(editAlbumRequest.AlbumId), RequestParameters.AlbumIdShort },
             { new StringContent(editAlbumRequest.Title), RequestParameters.Title },
@@ -300,7 +300,7 @@ public sealed class CatBoxClient : ICatBoxClient
 
         using var content = new MultipartFormDataContent
         {
-            { new StringContent(modifyAlbumImagesRequest.Request.Value), RequestParameters.Request },
+            { new StringContent(modifyAlbumImagesRequest.Request), RequestParameters.Request },
             { new StringContent(modifyAlbumImagesRequest.UserHash), RequestParameters.UserHash },
             { new StringContent(modifyAlbumImagesRequest.AlbumId), RequestParameters.AlbumIdShort }
         };

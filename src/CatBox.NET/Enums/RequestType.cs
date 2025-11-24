@@ -5,7 +5,7 @@ namespace CatBox.NET.Enums;
 /// <summary>
 /// Types used for CatBox
 /// </summary>
-[Intellenum(typeof(string))]
+[Intellenum<string>(Conversions.TypeConverter)]
 [Member("UploadFile", "fileupload")]
 [Member("UrlUpload", "urlupload")]
 [Member("DeleteFile", "deletefiles")]
