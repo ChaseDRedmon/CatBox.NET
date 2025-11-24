@@ -1,9 +1,9 @@
 ﻿namespace CatBox.NET.Requests.Litterbox;
 
 /// <summary>
-/// A temporary request for an individual file upload
+/// A temporary requestBase for an individual file upload
 /// </summary>
-public sealed record TemporaryStreamUploadRequest : TemporaryRequest
+public sealed record TemporaryStreamUploadRequest : TemporaryRequestBase
 {
     /// <summary>
     /// The name of the file

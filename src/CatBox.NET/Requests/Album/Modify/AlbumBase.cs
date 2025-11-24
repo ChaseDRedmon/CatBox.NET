@@ -1,11 +1,11 @@
 ﻿using CatBox.NET.Enums;
 
-namespace CatBox.NET.Requests.CatBox;
+namespace CatBox.NET.Requests.Album.Modify;
 
 /// <summary>
 /// An abstract request representing parameters needed to work with the Album API
 /// </summary>
-public abstract record Album
+public abstract record AlbumBase
 {
     /// <summary>
     /// <see cref="RequestType"/>

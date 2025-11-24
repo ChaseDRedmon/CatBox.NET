@@ -1,9 +1,9 @@
 ﻿namespace CatBox.NET.Requests.Litterbox;
 
 /// <summary>
-/// A temporary request for a collection of one or more files
+/// A temporary requestBase for a collection of one or more files
 /// </summary>
-public sealed record TemporaryFileUploadRequest : TemporaryRequest
+public sealed record TemporaryFileUploadRequest : TemporaryRequestBase
 {
     /// <summary>
     /// A collection of files to upload

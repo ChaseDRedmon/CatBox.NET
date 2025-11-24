@@ -2,7 +2,7 @@
 
 namespace CatBox.NET.Requests.Litterbox;
 
-public abstract record TemporaryRequest
+public abstract record TemporaryRequestBase
 {
     /// <summary>
     /// When the image, or images, should be expired

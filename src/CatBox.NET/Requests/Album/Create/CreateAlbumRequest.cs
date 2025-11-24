@@ -1,8 +1,13 @@
 ﻿using AnyOfTypes;
+using CatBox.NET.Requests.File;
+using CatBox.NET.Requests.URL;
 
-namespace CatBox.NET.Requests.CatBox;
+namespace CatBox.NET.Requests.Album.Create;
 
-public record CreateAlbumRequest : AlbumCreationRequest, IAlbumUploadRequest
+/// <summary>
+/// 
+/// </summary>
+public sealed record CreateAlbumRequest : AlbumCreationRequestBase, IAlbumUploadRequest
 {
     public required AnyOf<FileUploadRequest, IEnumerable<StreamUploadRequest>, UrlUploadRequest> UploadRequest { get; init; }
 }
