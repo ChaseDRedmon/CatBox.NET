@@ -190,6 +190,7 @@ public sealed class CatBoxClient : ICatBoxClient
 
         foreach (var fileUrl in urlUploadRequest.Files.Where(f => f is not null))
         {
+            ct.ThrowIfCancellationRequested();
             using var content = new MultipartFormDataContent // Disposing of MultipartFormDataContent, cascades disposal of String / Stream / Content classes
             {
                 { new StringContent(RequestType.UrlUpload), RequestParameters.Request },

@@ -27,17 +27,17 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
 
-      # 4. Restore dependencies for the library
-      - name: Restore library dependencies
-        run: dotnet restore src/CatBox.NET/CatBox.NET.csproj
+      # 4. Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore CatBox.NET.sln
 
-      # 5. Build the library
-      - name: Build library
-        run: dotnet build src/CatBox.NET/CatBox.NET.csproj --configuration Release --no-restore
+      # 5. Build solution
+      - name: Build solution
+        run: dotnet build CatBox.NET.sln --configuration Release --no-restore
 
-      # 6. Run tests (pointing to your test project)
+      # 6. Run tests
       - name: Run tests
-        run: dotnet test tests/CatBox.Tests/CatBox.Tests.csproj --configuration Release --no-build
+        run: dotnet test CatBox.NET.sln --configuration Release --no-build
 
       # 7. Pack the NuGet package
       - name: Pack NuGet package

@@ -61,6 +61,7 @@ public sealed class LitterboxClient : ILitterboxClient
 
         foreach (var imageFile in temporaryFileUploadRequest.Files.Where(IsFileExtensionValid))
         {
+            ct.ThrowIfCancellationRequested();
             await using var fileStream = File.OpenRead(imageFile.FullName);
 
             Throw.IfLitterboxFileSizeExceeds(fileStream.Length, MaxFileSize);
@@ -80,6 +81,7 @@ public sealed class LitterboxClient : ILitterboxClient
     public async Task<string?> UploadImageAsync(TemporaryStreamUploadRequest temporaryStreamUploadRequest, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(temporaryStreamUploadRequest?.FileName);
+        ct.ThrowIfCancellationRequested();
 
         if (temporaryStreamUploadRequest!.Stream.CanSeek)
             Throw.IfLitterboxFileSizeExceeds(temporaryStreamUploadRequest.Stream.Length, MaxFileSize);
