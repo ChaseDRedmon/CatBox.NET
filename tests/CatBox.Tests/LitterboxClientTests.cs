@@ -272,7 +272,7 @@ public class LitterboxClientTests
         };
 
         var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await cts.CancelAsync();
 
         // Act & Assert
         await Should.ThrowAsync<OperationCanceledException>(async () =>
@@ -373,7 +373,7 @@ public class LitterboxClientTests
         };
 
         var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await cts.CancelAsync();
 
         // Act & Assert
         await Should.ThrowAsync<OperationCanceledException>(async () => await client.UploadImageAsync(request, cts.Token));

@@ -45,78 +45,39 @@ public class CommonTests
     }
 
     [Test]
-    public void ThrowIfAlbumCreationRequestIsInvalid_WithNullRequest_ThrowsArgumentNullException()
+    public void IfAlbumCreationRequestIsInvalid_WithNullRequest_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => Common.ThrowIfAlbumCreationRequestIsInvalid(null!));
+        Should.Throw<ArgumentNullException>(() => Throw.IfAlbumCreationRequestIsInvalid(null!));
     }
 
-    [Test]
-    public void ThrowIfAlbumCreationRequestIsInvalid_WithNullTitle_ThrowsArgumentException()
+    private static IEnumerable<TestCaseData> InvalidAlbumCreationRequestCases()
+    {
+        yield return new TestCaseData(null, "Test Description").SetName("Null Title");
+        yield return new TestCaseData("   ", "Test Description").SetName("Whitespace Title");
+        yield return new TestCaseData("Test Title", null).SetName("Null Description");
+        yield return new TestCaseData("Test Title", "   ").SetName("Whitespace Description");
+    }
+
+    [TestCaseSource(nameof(InvalidAlbumCreationRequestCases))]
+    public void IfAlbumCreationRequestIsInvalid_WithInvalidRequest_ThrowsArgumentException(
+        string? title, string? description)
     {
         // Arrange
         var request = new RemoteCreateAlbumRequest
         {
-            Title = null!,
-            Description = "Test Description",
+            Title = title!,
+            Description = description!,
             UserHash = "test-hash",
             Files = ["file1.jpg"]
         };
 
         // Act & Assert
-        Should.Throw<ArgumentException>(() => Common.ThrowIfAlbumCreationRequestIsInvalid(request));
+        Should.Throw<ArgumentException>(() => Throw.IfAlbumCreationRequestIsInvalid(request));
     }
 
     [Test]
-    public void ThrowIfAlbumCreationRequestIsInvalid_WithWhitespaceTitle_ThrowsArgumentException()
-    {
-        // Arrange
-        var request = new RemoteCreateAlbumRequest
-        {
-            Title = "   ",
-            Description = "Test Description",
-            UserHash = "test-hash",
-            Files = ["file1.jpg"]
-        };
-
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => Common.ThrowIfAlbumCreationRequestIsInvalid(request));
-    }
-
-    [Test]
-    public void ThrowIfAlbumCreationRequestIsInvalid_WithNullDescription_ThrowsArgumentException()
-    {
-        // Arrange
-        var request = new RemoteCreateAlbumRequest
-        {
-            Title = "Test Title",
-            Description = null!,
-            UserHash = "test-hash",
-            Files = ["file1.jpg"]
-        };
-
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => Common.ThrowIfAlbumCreationRequestIsInvalid(request));
-    }
-
-    [Test]
-    public void ThrowIfAlbumCreationRequestIsInvalid_WithWhitespaceDescription_ThrowsArgumentException()
-    {
-        // Arrange
-        var request = new RemoteCreateAlbumRequest
-        {
-            Title = "Test Title",
-            Description = "   ",
-            UserHash = "test-hash",
-            Files = ["file1.jpg"]
-        };
-
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => Common.ThrowIfAlbumCreationRequestIsInvalid(request));
-    }
-
-    [Test]
-    public void ThrowIfAlbumCreationRequestIsInvalid_WithValidRequest_DoesNotThrow()
+    public void IfAlbumCreationRequestIsInvalid_WithValidRequest_DoesNotThrow()
     {
         // Arrange
         var request = new RemoteCreateAlbumRequest
@@ -128,7 +89,7 @@ public class CommonTests
         };
 
         // Act & Assert
-        Should.NotThrow(() => Common.ThrowIfAlbumCreationRequestIsInvalid(request));
+        Should.NotThrow(() => Throw.IfAlbumCreationRequestIsInvalid(request));
     }
 
     private static IEnumerable<TestCaseData> ValidAlbumRequestCases()
@@ -214,5 +175,96 @@ public class CommonTests
 
         // Assert
         result.ShouldBeFalse();
+    }
+
+    [TestCase("https://files.catbox.moe/abc123.jpg", "abc123.jpg")]
+    [TestCase("http://files.catbox.moe/xyz789.png", "xyz789.png")]
+    [TestCase("https://files.catbox.moe/test.gif", "test.gif")]
+    public void ToCatboxImageName_WithFullCatboxUrl_ExtractsFilename(string url, string expected)
+    {
+        url.ToCatboxImageName().ShouldBe(expected);
+    }
+
+    [TestCase("abc123.jpg", "abc123.jpg")]
+    [TestCase("myfile.png", "myfile.png")]
+    public void ToCatboxImageName_WithPlainFilename_ReturnsOriginal(string input, string expected)
+    {
+        input.ToCatboxImageName().ShouldBe(expected);
+    }
+
+    [TestCase("https://example.com/image.jpg")]
+    [TestCase("https://otherdomain.moe/file.png")]
+    public void ToCatboxImageName_WithNonCatboxUrl_ReturnsOriginal(string url)
+    {
+        url.ToCatboxImageName().ShouldBe(url);
+    }
+
+    [TestCase(null, null)]
+    [TestCase("", "")]
+    [TestCase("   ", "   ")]
+    public void ToCatboxImageName_WithNullOrWhitespace_ReturnsInput(string? input, string? expected)
+    {
+        input.ToCatboxImageName().ShouldBe(expected);
+    }
+
+    [TestCase("https://catbox.moe/c/abc123", "abc123")]
+    [TestCase("http://catbox.moe/c/xyz789", "xyz789")]
+    [TestCase("https://catbox.moe/c/test", "test")]
+    public void ToAlbumShortCode_WithFullAlbumUrl_ExtractsShortCode(string url, string expected)
+    {
+        url.ToAlbumShortCode().ShouldBe(expected);
+    }
+
+    [TestCase("abc123", "abc123")]
+    [TestCase("xyz789", "xyz789")]
+    public void ToAlbumShortCode_WithPlainShortCode_ReturnsOriginal(string input, string expected)
+    {
+        input.ToAlbumShortCode().ShouldBe(expected);
+    }
+
+    [TestCase("https://catbox.moe/other/abc123")]
+    [TestCase("https://files.catbox.moe/abc123.jpg")]
+    [TestCase("https://example.com/c/abc123")]
+    public void ToAlbumShortCode_WithNonAlbumUrl_ReturnsOriginal(string url)
+    {
+        url.ToAlbumShortCode().ShouldBe(url);
+    }
+
+    [TestCase(null, null)]
+    [TestCase("", "")]
+    [TestCase("   ", "   ")]
+    public void ToAlbumShortCode_WithNullOrWhitespace_ReturnsInput(string? input, string? expected)
+    {
+        input.ToAlbumShortCode().ShouldBe(expected);
+    }
+
+    [Test]
+    public void IfAlbumFileLimitExceeds_At501Files_Throws()
+    {
+        Should.Throw<Exception>(() => Throw.IfAlbumFileLimitExceeds(501));
+    }
+
+    [Test]
+    public void IfAlbumFileLimitExceeds_At500Files_DoesNotThrow()
+    {
+        Should.NotThrow(() => Throw.IfAlbumFileLimitExceeds(500));
+    }
+
+    [Test]
+    public void IfAlbumFileLimitExceeds_At1File_DoesNotThrow()
+    {
+        Should.NotThrow(() => Throw.IfAlbumFileLimitExceeds(1));
+    }
+
+    [Test]
+    public void IfAlbumFileLimitExceeds_WithCustomLimit_ThrowsAtExceedingLimit()
+    {
+        Should.Throw<Exception>(() => Throw.IfAlbumFileLimitExceeds(11, maxFiles: 10));
+    }
+
+    [Test]
+    public void IfAlbumFileLimitExceeds_WithCustomLimit_DoesNotThrowAtLimit()
+    {
+        Should.NotThrow(() => Throw.IfAlbumFileLimitExceeds(10, maxFiles: 10));
     }
 }

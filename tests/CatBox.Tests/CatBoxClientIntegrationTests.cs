@@ -59,7 +59,7 @@ public class CatBoxClientIntegrationTests
             // Delete albums first (they reference files)
             if (_createdAlbums.Count > 0)
             {
-                TestContext.WriteLine($"Cleaning up {_createdAlbums.Count} album(s)...");
+                await TestContext.Out.WriteLineAsync($"Cleaning up {_createdAlbums.Count} album(s)...");
                 foreach (var albumId in _createdAlbums)
                 {
                     try
@@ -72,11 +72,11 @@ public class CatBoxClientIntegrationTests
                             Files = []
                         };
                         await _client.ModifyAlbumAsync(deleteAlbumRequest);
-                        TestContext.WriteLine($"Deleted album: {albumId}");
+                        await TestContext.Out.WriteLineAsync($"Deleted album: {albumId}");
                     }
                     catch (Exception ex)
                     {
-                        TestContext.WriteLine($"Failed to delete album {albumId}: {ex.Message}");
+                        await TestContext.Out.WriteLineAsync($"Failed to delete album {albumId}: {ex.Message}");
                     }
                 }
             }
@@ -84,7 +84,7 @@ public class CatBoxClientIntegrationTests
             // Then delete individual files
             if (_uploadedFiles.Count > 0)
             {
-                TestContext.WriteLine($"Cleaning up {_uploadedFiles.Count} file(s)...");
+                await TestContext.Out.WriteLineAsync($"Cleaning up {_uploadedFiles.Count} file(s)...");
                 var deleteRequest = new DeleteFileRequest
                 {
                     UserHash = IntegrationTestConfig.UserHash!,
@@ -92,12 +92,12 @@ public class CatBoxClientIntegrationTests
                 };
 
                 var result = await _client.DeleteMultipleFilesAsync(deleteRequest);
-                TestContext.WriteLine($"Delete result: {result}");
+                await TestContext.Out.WriteLineAsync($"Delete result: {result}");
             }
         }
         catch (Exception ex)
         {
-            TestContext.WriteLine($"Cleanup error: {ex.Message}");
+            await TestContext.Out.WriteLineAsync($"Cleanup error: {ex.Message}");
         }
     }
 
@@ -113,7 +113,7 @@ public class CatBoxClientIntegrationTests
             if (!_uploadedFiles.Contains(fileName))
             {
                 _uploadedFiles.Add(fileName);
-                TestContext.WriteLine($"Tracked file for cleanup: {fileName}");
+                TestContext.Out.WriteLine($"Tracked file for cleanup: {fileName}");
             }
         }
     }
@@ -130,7 +130,7 @@ public class CatBoxClientIntegrationTests
             if (!_createdAlbums.Contains(albumId))
             {
                 _createdAlbums.Add(albumId);
-                TestContext.WriteLine($"Tracked album for cleanup: {albumId}");
+                TestContext.Out.WriteLine($"Tracked album for cleanup: {albumId}");
             }
         }
     }
@@ -161,7 +161,7 @@ public class CatBoxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://files.catbox.moe/");
-        TestContext.WriteLine($"Uploaded file URL: {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded file URL: {results[0]}");
     }
 
     [Test]
@@ -195,7 +195,7 @@ public class CatBoxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://files.catbox.moe/");
-        TestContext.WriteLine($"Uploaded stream URL: {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded stream URL: {results[0]}");
     }
 
     [Test]
@@ -221,7 +221,7 @@ public class CatBoxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://files.catbox.moe/");
-        TestContext.WriteLine($"Uploaded from URL: {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded from URL: {results[0]}");
     }
 
     [Test]
@@ -264,7 +264,7 @@ public class CatBoxClientIntegrationTests
         // Assert
         albumUrl.ShouldNotBeNullOrWhiteSpace();
         albumUrl.ShouldStartWith("https://catbox.moe/c/");
-        TestContext.WriteLine($"Created album: {albumUrl}");
+        await TestContext.Out.WriteLineAsync($"Created album: {albumUrl}");
     }
 
     [Test]
@@ -320,7 +320,7 @@ public class CatBoxClientIntegrationTests
         };
 
         var addResult = await _client.ModifyAlbumAsync(addRequest);
-        TestContext.WriteLine($"Add to album result: {addResult}");
+        await TestContext.Out.WriteLineAsync($"Add to album result: {addResult}");
 
         // Act - Remove file from album
         var removeRequest = new ModifyAlbumImagesRequest
@@ -332,7 +332,7 @@ public class CatBoxClientIntegrationTests
         };
 
         var removeResult = await _client.ModifyAlbumAsync(removeRequest);
-        TestContext.WriteLine($"Remove from album result: {removeResult}");
+        await TestContext.Out.WriteLineAsync($"Remove from album result: {removeResult}");
 
         // Assert
         addResult.ShouldNotBeNullOrWhiteSpace();
@@ -371,6 +371,6 @@ public class CatBoxClientIntegrationTests
 
         // Assert
         result.ShouldNotBeNullOrWhiteSpace();
-        TestContext.WriteLine($"Delete result: {result}");
+        await TestContext.Out.WriteLineAsync($"Delete result: {result}");
     }
 }
