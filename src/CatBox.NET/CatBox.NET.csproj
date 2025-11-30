@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <Version>1.0</Version>
+    <Version>1.1</Version>
     <Authors>Chase Redmon, Kuinox, Adam Sears</Authors>
     <Description>CatBox.NET is a .NET Library for uploading files, URLs, and modifying albums on CatBox.moe</Description>
     <PackageProjectUrl>https://github.com/ChaseDRedmon/CatBox.NET</PackageProjectUrl>
@@ -15,6 +15,7 @@
     <PackageLicenseUrl>https://github.com/ChaseDRedmon/CatBox.NET/blob/main/license.txt</PackageLicenseUrl>
     <PackageReleaseNotes>Fix required description field on create album endpoint. Description is optional when creating an endpoint.</PackageReleaseNotes>
     <TargetFramework>net10.0</TargetFramework>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
