@@ -71,9 +71,9 @@ public sealed class LitterboxClient : ILitterboxClient
                 { new StringContent(RequestType.UploadFile), RequestParameters.Request },
                 { new StringContent(temporaryFileUploadRequest.Expiry), RequestParameters.Expiry },
                 { new StreamContent(fileStream), RequestParameters.FileToUpload, imageFile.Name }
-            }, ct);
+            }, ct).ConfigureAwait(false);
             
-            yield return await response.Content.ReadAsStringAsync(ct);
+            yield return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
         }
     }
     
@@ -94,8 +94,8 @@ public sealed class LitterboxClient : ILitterboxClient
                 new StreamContent(temporaryStreamUploadRequest.Stream), RequestParameters.FileToUpload,
                 temporaryStreamUploadRequest.FileName
             }
-        }, ct);
+        }, ct).ConfigureAwait(false);
         
-        return await response.Content.ReadAsStringAsync(ct);
+        return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
     }
 }

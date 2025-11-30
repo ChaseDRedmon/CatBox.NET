@@ -1,4 +1,6 @@
-﻿using CatBox.NET.Client;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using CatBox.NET.Client;
 using CatBox.NET.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
@@ -30,7 +32,7 @@ public static class CatBoxServices
             return services;
         }
 
-        private IServiceCollection AddHttpClientWithMessageHandler<TInterface, TImplementation>()
+        private IServiceCollection AddHttpClientWithMessageHandler<TInterface, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TImplementation>()
             where TInterface : class
             where TImplementation : class, TInterface
         {
@@ -48,8 +50,27 @@ public static class CatBoxServices
                         BackoffType = DelayBackoffType.Exponential,
                         UseJitter = true,
                         Delay = TimeSpan.FromSeconds(5),
-                        MaxRetryAttempts = 5
+                        MaxRetryAttempts = 5,
+                        ShouldHandle = args =>
+                        {
+                            // Don't retry custom CatBox exceptions - these are client errors (4xx)
+                            // Our exceptions inherit from Exception, not HttpRequestException
+                            if (args.Outcome.Exception is not null and not HttpRequestException)
+                                return ValueTask.FromResult(false);
+
+                            // Retry HttpRequestException (network failures, timeouts)
+                            if (args.Outcome.Exception is HttpRequestException)
+                                return ValueTask.FromResult(true);
+
+                            // Retry 5xx server errors
+                            if (args.Outcome.Result is { } response)
+                                return ValueTask.FromResult(response.StatusCode >= HttpStatusCode.InternalServerError);
+
+                            return ValueTask.FromResult(false);
+                        }
                     };
+                    
+                    
                 });
 
             return services;

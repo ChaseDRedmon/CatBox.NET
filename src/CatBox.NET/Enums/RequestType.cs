@@ -14,4 +14,5 @@ namespace CatBox.NET.Enums;
 [Member("AddToAlbum", "addtoalbum")]
 [Member("RemoveFromAlbum", "removefromalbum")]
 [Member("DeleteAlbum", "deletealbum")]
+[Member("GetAlbum", "getalbum")]
 public sealed partial class RequestType;
