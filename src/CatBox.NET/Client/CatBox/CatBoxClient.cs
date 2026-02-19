@@ -1,10 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
 using CatBox.NET.Enums;
 using CatBox.NET.Requests.Album;
 using CatBox.NET.Requests.Album.Create;
 using CatBox.NET.Requests.Album.Modify;
 using CatBox.NET.Requests.File;
 using CatBox.NET.Requests.URL;
+using CatBox.NET.Responses;
+using CatBox.NET.Responses.Album;
 using Microsoft.Extensions.Options;
 using static CatBox.NET.Client.Common;
 
@@ -105,6 +108,41 @@ public interface ICatBoxClient
     /// <see cref="CatBox.NET.Enums.RequestType.DeleteAlbum"/> . <br/> <br/>
     /// Use <see cref="ICatBoxClient.EditAlbumAsync"/> to edit an album</remarks>
     Task<string?> ModifyAlbumAsync(ModifyAlbumImagesRequest modifyAlbumImagesRequest, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets album information including the list of files
+    /// </summary>
+    /// <param name="getAlbumRequest">Request containing the album ID</param>
+    /// <param name="ct">Cancellation Token</param>
+    /// <exception cref="ArgumentNullException">When <see cref="GetAlbumRequest"/> is null</exception>
+    /// <exception cref="ArgumentException">When <see cref="GetAlbumRequest.AlbumId"/> is null or whitespace</exception>
+    /// <exception cref="HttpRequestException">When something bad happens when talking to the API</exception>
+    /// <returns>Album information with parsed file list</returns>
+    Task<AlbumInfo> GetAlbumAsync(GetAlbumRequest getAlbumRequest, CancellationToken ct = default);
+
+    /// <summary>
+    /// Downloads a file from CatBox to the specified directory
+    /// </summary>
+    /// <param name="fileName">The file name (e.g., "abc123.png")</param>
+    /// <param name="destination">Directory to save the file</param>
+    /// <param name="ct">Cancellation Token</param>
+    /// <exception cref="ArgumentException">When fileName is null or whitespace</exception>
+    /// <exception cref="ArgumentNullException">When destination is null</exception>
+    /// <exception cref="HttpRequestException">When something bad happens when talking to the API</exception>
+    /// <remarks>Skips download if file already exists at destination</remarks>
+    Task DownloadFileAsync(string fileName, DirectoryInfo destination, CancellationToken ct = default);
+
+    /// <summary>
+    /// Downloads a file from CatBox to the specified path
+    /// </summary>
+    /// <param name="fileName">The file name (e.g., "abc123.png")</param>
+    /// <param name="destinationPath">Directory path to save the file</param>
+    /// <param name="ct">Cancellation Token</param>
+    /// <exception cref="ArgumentException">When fileName is null or whitespace</exception>
+    /// <exception cref="ArgumentException">When destinationPath is null or whitespace</exception>
+    /// <exception cref="HttpRequestException">When something bad happens when talking to the API</exception>
+    /// <remarks>Skips download if file already exists at destination</remarks>
+    Task DownloadFileAsync(string fileName, string destinationPath, CancellationToken ct = default);
 }
 
 public sealed class CatBoxClient : ICatBoxClient
@@ -152,8 +190,8 @@ public sealed class CatBoxClient : ICatBoxClient
             if (!string.IsNullOrWhiteSpace(fileUploadRequest.UserHash))
                 content.Add(new StringContent(fileUploadRequest.UserHash), RequestParameters.UserHash);
 
-            using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct);
-            yield return await response.Content.ReadAsStringAsync(ct);
+            using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+            yield return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
         }
     }
     
@@ -178,8 +216,8 @@ public sealed class CatBoxClient : ICatBoxClient
             if (!string.IsNullOrWhiteSpace(uploadRequest.UserHash))
                 content.Add(new StringContent(uploadRequest.UserHash), RequestParameters.UserHash);
 
-            using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct);
-            yield return await response.Content.ReadAsStringAsync(ct);
+            using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+            yield return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
         }
     }
 
@@ -200,8 +238,8 @@ public sealed class CatBoxClient : ICatBoxClient
             if (!string.IsNullOrWhiteSpace(urlUploadRequest.UserHash))
                 content.Add(new StringContent(urlUploadRequest.UserHash), RequestParameters.UserHash);
 
-            using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct);
-            yield return await response.Content.ReadAsStringAsync(ct);
+            using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+            yield return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
         }
     }
 
@@ -221,24 +259,18 @@ public sealed class CatBoxClient : ICatBoxClient
             { new StringContent(fileNames), RequestParameters.Files }
         };
 
-        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+        return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
     }
     
     /// <inheritdoc/>
     public async Task<string?> CreateAlbumAsync(RemoteCreateAlbumRequest remoteCreateAlbumRequest, CancellationToken ct = default)
     {
-        ThrowIfAlbumCreationRequestIsInvalid(remoteCreateAlbumRequest);
+        Throw.IfAlbumCreationRequestIsInvalid(remoteCreateAlbumRequest);
 
-        var links = remoteCreateAlbumRequest.Files.Select(link =>
-        {
-            if (link?.Contains(_catboxOptions.CatBoxUrl!.Host) is true)
-            {
-                return new Uri(link).PathAndQuery[1..];
-            }
+        var links = remoteCreateAlbumRequest.Files.Select(link => link.ToCatboxImageName()).ToList();
 
-            return link;
-        });
+        Throw.IfAlbumFileLimitExceeds(links.Count);
 
         var fileNames = string.Join(" ", links);
         ArgumentException.ThrowIfNullOrWhiteSpace(fileNames);
@@ -256,8 +288,8 @@ public sealed class CatBoxClient : ICatBoxClient
         if (!string.IsNullOrWhiteSpace(remoteCreateAlbumRequest.Description))
             content.Add(new StringContent(remoteCreateAlbumRequest.Description), RequestParameters.Description);
 
-        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+        return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -284,8 +316,8 @@ public sealed class CatBoxClient : ICatBoxClient
             { new StringContent(fileNames), RequestParameters.Files }
         };
 
-        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+        return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
     }
     
     /// <inheritdoc/>
@@ -297,7 +329,12 @@ public sealed class CatBoxClient : ICatBoxClient
         Throw.IfAlbumRequestTypeInvalid(IsAlbumRequestTypeValid(modifyAlbumImagesRequest), nameof(modifyAlbumImagesRequest.Request));
         Throw.IfAlbumOperationInvalid(modifyAlbumImagesRequest.Request, RequestType.AddToAlbum, RequestType.RemoveFromAlbum, RequestType.DeleteAlbum);
 
-        var fileNames = string.Join(" ", modifyAlbumImagesRequest.Files);
+        var files = modifyAlbumImagesRequest.Files.ToList();
+
+        if (modifyAlbumImagesRequest.Request == RequestType.AddToAlbum)
+            Throw.IfAlbumFileLimitExceeds(files.Count);
+
+        var fileNames = string.Join(" ", files);
 
         using var content = new MultipartFormDataContent
         {
@@ -313,7 +350,73 @@ public sealed class CatBoxClient : ICatBoxClient
             content.Add(new StringContent(fileNames), RequestParameters.Files);
         }
 
-        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct);
-        return await response.Content.ReadAsStringAsync(ct);
+        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+        return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<AlbumInfo> GetAlbumAsync(GetAlbumRequest getAlbumRequest, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(getAlbumRequest);
+        ArgumentException.ThrowIfNullOrWhiteSpace(getAlbumRequest.AlbumId);
+
+        using var content = new MultipartFormDataContent
+        {
+            { new StringContent(RequestType.GetAlbum), RequestParameters.Request },
+            { new StringContent(getAlbumRequest.AlbumId), RequestParameters.AlbumIdShort }
+        };
+
+        using var response = await _client.PostAsync(_catboxOptions.CatBoxUrl, content, ct).ConfigureAwait(false);
+        var json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+
+        var apiResponse = JsonSerializer.Deserialize(json, CatBoxJsonContext.Default.GetAlbumApiResponse);
+
+        // ExceptionHandler will throw CatBoxAlbumNotFoundException for HTTP 400 errors
+        // This check is only for unexpected response format
+        if (apiResponse?.Data is null)
+            throw new HttpRequestException($"Unexpected response format: {json}");
+
+        var files = string.IsNullOrWhiteSpace(apiResponse.Data.Files)
+            ? []
+            : apiResponse.Data.Files.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        return new AlbumInfo
+        {
+            Title = apiResponse.Data.Title,
+            Description = apiResponse.Data.Description,
+            AlbumId = apiResponse.Data.Short,
+            DateCreated = apiResponse.Data.DateCreated,
+            Files = files
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task DownloadFileAsync(string fileName, DirectoryInfo destination, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        ArgumentNullException.ThrowIfNull(destination);
+
+        if (!destination.Exists)
+            destination.Create();
+
+        var filePath = Path.Combine(destination.FullName, fileName);
+
+        // Skip if file exists
+        if (File.Exists(filePath))
+            return;
+
+        var fileUrl = new Uri(_catboxOptions.CatBoxFilesUrl, fileName);
+
+        using var response = await _client.GetAsync(fileUrl, ct).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        await using var fileStream = File.Create(filePath);
+        await response.Content.CopyToAsync(fileStream, ct).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public Task DownloadFileAsync(string fileName, string destinationPath, CancellationToken ct = default)
+    {
+        return DownloadFileAsync(fileName, new DirectoryInfo(destinationPath), ct);
     }
 }

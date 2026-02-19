@@ -250,7 +250,7 @@ public class CatBoxClientTests
         };
 
         var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await cts.CancelAsync();
 
         // Act & Assert
         await Should.ThrowAsync<OperationCanceledException>(async () =>
@@ -509,7 +509,7 @@ public class CatBoxClientTests
         };
 
         var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await cts.CancelAsync();
 
         // Act & Assert
         await Should.ThrowAsync<OperationCanceledException>(async () =>

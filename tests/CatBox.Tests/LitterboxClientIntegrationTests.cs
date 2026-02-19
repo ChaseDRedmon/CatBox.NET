@@ -66,7 +66,7 @@ public class LitterboxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://litter.catbox.moe/");
-        TestContext.WriteLine($"Uploaded temporary file (1h expiry): {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded temporary file (1h expiry): {results[0]}");
     }
 
     [Test]
@@ -91,7 +91,7 @@ public class LitterboxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://litter.catbox.moe/");
-        TestContext.WriteLine($"Uploaded temporary file (12h expiry): {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded temporary file (12h expiry): {results[0]}");
     }
 
     [Test]
@@ -116,7 +116,7 @@ public class LitterboxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://litter.catbox.moe/");
-        TestContext.WriteLine($"Uploaded temporary file (1d expiry): {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded temporary file (1d expiry): {results[0]}");
     }
 
     [Test]
@@ -141,7 +141,7 @@ public class LitterboxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://litter.catbox.moe/");
-        TestContext.WriteLine($"Uploaded temporary file (3d expiry): {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded temporary file (3d expiry): {results[0]}");
     }
 
     [Test]
@@ -165,7 +165,7 @@ public class LitterboxClientIntegrationTests
         // Assert
         result.ShouldNotBeNullOrWhiteSpace();
         result.ShouldStartWith("https://litter.catbox.moe/");
-        TestContext.WriteLine($"Uploaded temporary stream: {result}");
+        await TestContext.Out.WriteLineAsync($"Uploaded temporary stream: {result}");
     }
 
     [Test]
@@ -189,10 +189,10 @@ public class LitterboxClientIntegrationTests
         // Assert
         results.Count.ShouldBe(3);
         results.ShouldAllBe(r => !string.IsNullOrWhiteSpace(r) && r!.StartsWith("https://litter.catbox.moe/"));
-        TestContext.WriteLine($"Uploaded {results.Count} temporary files");
+        await TestContext.Out.WriteLineAsync($"Uploaded {results.Count} temporary files");
         foreach (var url in results)
         {
-            TestContext.WriteLine($"  - {url}");
+            await TestContext.Out.WriteLineAsync($"  - {url}");
         }
     }
 }

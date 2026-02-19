@@ -1,10 +1,12 @@
 using CatBox.NET;
 using CatBox.NET.Client;
 using CatBox.NET.Enums;
+using CatBox.NET.Requests.Album;
 using CatBox.NET.Requests.Album.Create;
 using CatBox.NET.Requests.Album.Modify;
 using CatBox.NET.Requests.File;
 using CatBox.NET.Requests.URL;
+using CatBox.NET.Responses.Album;
 using CatBox.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -59,7 +61,7 @@ public class CatBoxClientIntegrationTests
             // Delete albums first (they reference files)
             if (_createdAlbums.Count > 0)
             {
-                TestContext.WriteLine($"Cleaning up {_createdAlbums.Count} album(s)...");
+                await TestContext.Out.WriteLineAsync($"Cleaning up {_createdAlbums.Count} album(s)...");
                 foreach (var albumId in _createdAlbums)
                 {
                     try
@@ -72,11 +74,11 @@ public class CatBoxClientIntegrationTests
                             Files = []
                         };
                         await _client.ModifyAlbumAsync(deleteAlbumRequest);
-                        TestContext.WriteLine($"Deleted album: {albumId}");
+                        await TestContext.Out.WriteLineAsync($"Deleted album: {albumId}");
                     }
                     catch (Exception ex)
                     {
-                        TestContext.WriteLine($"Failed to delete album {albumId}: {ex.Message}");
+                        await TestContext.Out.WriteLineAsync($"Failed to delete album {albumId}: {ex.Message}");
                     }
                 }
             }
@@ -84,7 +86,7 @@ public class CatBoxClientIntegrationTests
             // Then delete individual files
             if (_uploadedFiles.Count > 0)
             {
-                TestContext.WriteLine($"Cleaning up {_uploadedFiles.Count} file(s)...");
+                await TestContext.Out.WriteLineAsync($"Cleaning up {_uploadedFiles.Count} file(s)...");
                 var deleteRequest = new DeleteFileRequest
                 {
                     UserHash = IntegrationTestConfig.UserHash!,
@@ -92,12 +94,12 @@ public class CatBoxClientIntegrationTests
                 };
 
                 var result = await _client.DeleteMultipleFilesAsync(deleteRequest);
-                TestContext.WriteLine($"Delete result: {result}");
+                await TestContext.Out.WriteLineAsync($"Delete result: {result}");
             }
         }
         catch (Exception ex)
         {
-            TestContext.WriteLine($"Cleanup error: {ex.Message}");
+            await TestContext.Out.WriteLineAsync($"Cleanup error: {ex.Message}");
         }
     }
 
@@ -106,14 +108,13 @@ public class CatBoxClientIntegrationTests
         if (string.IsNullOrWhiteSpace(url))
             return;
 
-        // Extract filename from URL (e.g., "abc123.png" from "https://files.catbox.moe/abc123.png")
-        var fileName = new Uri(url).Segments.Last();
+        var fileName = url.ToCatboxImageName()!;
         using (_lock.EnterScope())
         {
             if (!_uploadedFiles.Contains(fileName))
             {
                 _uploadedFiles.Add(fileName);
-                TestContext.WriteLine($"Tracked file for cleanup: {fileName}");
+                TestContext.Out.WriteLine($"Tracked file for cleanup: {fileName}");
             }
         }
     }
@@ -123,14 +124,13 @@ public class CatBoxClientIntegrationTests
         if (string.IsNullOrWhiteSpace(albumUrl))
             return;
 
-        // Extract album ID from URL (e.g., "abc123" from "https://catbox.moe/c/abc123")
-        var albumId = new Uri(albumUrl).Segments.Last();
+        var albumId = albumUrl.ToAlbumShortCode()!;
         using (_lock.EnterScope())
         {
             if (!_createdAlbums.Contains(albumId))
             {
                 _createdAlbums.Add(albumId);
-                TestContext.WriteLine($"Tracked album for cleanup: {albumId}");
+                TestContext.Out.WriteLine($"Tracked album for cleanup: {albumId}");
             }
         }
     }
@@ -161,7 +161,7 @@ public class CatBoxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://files.catbox.moe/");
-        TestContext.WriteLine($"Uploaded file URL: {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded file URL: {results[0]}");
     }
 
     [Test]
@@ -195,7 +195,7 @@ public class CatBoxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://files.catbox.moe/");
-        TestContext.WriteLine($"Uploaded stream URL: {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded stream URL: {results[0]}");
     }
 
     [Test]
@@ -221,7 +221,7 @@ public class CatBoxClientIntegrationTests
         results.Count.ShouldBe(1);
         results[0].ShouldNotBeNullOrWhiteSpace();
         results[0].ShouldStartWith("https://files.catbox.moe/");
-        TestContext.WriteLine($"Uploaded from URL: {results[0]}");
+        await TestContext.Out.WriteLineAsync($"Uploaded from URL: {results[0]}");
     }
 
     [Test]
@@ -246,7 +246,7 @@ public class CatBoxClientIntegrationTests
         // Extract filenames from URLs
         var fileNames = uploadedFileUrls
             .Where(url => !string.IsNullOrWhiteSpace(url))
-            .Select(url => new Uri(url!).Segments.Last())
+            .Select(url => url.ToCatboxImageName()!)
             .ToList();
 
         var albumRequest = new RemoteCreateAlbumRequest
@@ -264,7 +264,7 @@ public class CatBoxClientIntegrationTests
         // Assert
         albumUrl.ShouldNotBeNullOrWhiteSpace();
         albumUrl.ShouldStartWith("https://catbox.moe/c/");
-        TestContext.WriteLine($"Created album: {albumUrl}");
+        await TestContext.Out.WriteLineAsync($"Created album: {albumUrl}");
     }
 
     [Test]
@@ -286,7 +286,7 @@ public class CatBoxClientIntegrationTests
             break;
         }
         TrackUploadedFile(uploadedUrl);
-        var fileName = new Uri(uploadedUrl!).Segments.Last();
+        var fileName = uploadedUrl!.ToCatboxImageName()!;
 
         var createAlbumRequest = new RemoteCreateAlbumRequest
         {
@@ -298,7 +298,7 @@ public class CatBoxClientIntegrationTests
 
         var albumUrl = await _client.CreateAlbumAsync(createAlbumRequest);
         TrackCreatedAlbum(albumUrl);
-        var albumId = new Uri(albumUrl!).Segments.Last();
+        var albumId = albumUrl!.ToAlbumShortCode()!;
 
         // Upload another file to add to the album
         string? secondUploadUrl = null;
@@ -308,7 +308,7 @@ public class CatBoxClientIntegrationTests
             break;
         }
         TrackUploadedFile(secondUploadUrl);
-        var secondFileName = new Uri(secondUploadUrl!).Segments.Last();
+        var secondFileName = secondUploadUrl!.ToCatboxImageName()!;
 
         // Act - Add file to album
         var addRequest = new ModifyAlbumImagesRequest
@@ -320,7 +320,7 @@ public class CatBoxClientIntegrationTests
         };
 
         var addResult = await _client.ModifyAlbumAsync(addRequest);
-        TestContext.WriteLine($"Add to album result: {addResult}");
+        await TestContext.Out.WriteLineAsync($"Add to album result: {addResult}");
 
         // Act - Remove file from album
         var removeRequest = new ModifyAlbumImagesRequest
@@ -332,7 +332,7 @@ public class CatBoxClientIntegrationTests
         };
 
         var removeResult = await _client.ModifyAlbumAsync(removeRequest);
-        TestContext.WriteLine($"Remove from album result: {removeResult}");
+        await TestContext.Out.WriteLineAsync($"Remove from album result: {removeResult}");
 
         // Assert
         addResult.ShouldNotBeNullOrWhiteSpace();
@@ -358,7 +358,7 @@ public class CatBoxClientIntegrationTests
             break;
         }
         uploadedUrl.ShouldNotBeNullOrWhiteSpace();
-        var fileName = new Uri(uploadedUrl!).Segments.Last();
+        var fileName = uploadedUrl!.ToCatboxImageName()!;
 
         var deleteRequest = new DeleteFileRequest
         {
@@ -371,6 +371,148 @@ public class CatBoxClientIntegrationTests
 
         // Assert
         result.ShouldNotBeNullOrWhiteSpace();
-        TestContext.WriteLine($"Delete result: {result}");
+        await TestContext.Out.WriteLineAsync($"Delete result: {result}");
+    }
+
+    [Test]
+    [Order(7)]
+    public async Task GetAlbumAsync_WithCreatedAlbum_ReturnsAlbumInfo()
+    {
+        // Arrange - Upload a file and create an album
+        var testFilePath = IntegrationTestConfig.GetTestFilePath();
+        var uploadRequest = new FileUploadRequest
+        {
+            Files = [new FileInfo(testFilePath)],
+            UserHash = IntegrationTestConfig.UserHash
+        };
+
+        string? uploadedUrl = null;
+        await foreach (var url in _client!.UploadFilesAsync(uploadRequest))
+        {
+            uploadedUrl = url;
+            break;
+        }
+        TrackUploadedFile(uploadedUrl);
+        var fileName = uploadedUrl!.ToCatboxImageName()!;
+
+        var createAlbumRequest = new RemoteCreateAlbumRequest
+        {
+            Title = "GetAlbum Integration Test",
+            Description = "Testing GetAlbumAsync",
+            UserHash = IntegrationTestConfig.UserHash,
+            Files = [fileName]
+        };
+
+        var albumUrl = await _client.CreateAlbumAsync(createAlbumRequest);
+        TrackCreatedAlbum(albumUrl);
+        var albumId = albumUrl!.ToAlbumShortCode()!;
+
+        // Act
+        var albumInfo = await _client.GetAlbumAsync(new GetAlbumRequest { AlbumId = albumId });
+
+        // Assert
+        albumInfo.ShouldNotBeNull();
+        albumInfo.Title.ShouldBe("GetAlbum Integration Test");
+        albumInfo.Description.ShouldBe("Testing GetAlbumAsync");
+        albumInfo.AlbumId.ShouldBe(albumId);
+        albumInfo.Files.ShouldContain(fileName);
+        await TestContext.Out.WriteLineAsync($"Album info: {albumInfo.Title} ({albumInfo.AlbumId}), {albumInfo.Files.Length} file(s)");
+    }
+
+    [Test]
+    [Order(8)]
+    public async Task DownloadFileAsync_WithUploadedFile_DownloadsSuccessfully()
+    {
+        // Arrange - Upload a file
+        var testFilePath = IntegrationTestConfig.GetTestFilePath();
+        var uploadRequest = new FileUploadRequest
+        {
+            Files = [new FileInfo(testFilePath)],
+            UserHash = IntegrationTestConfig.UserHash
+        };
+
+        string? uploadedUrl = null;
+        await foreach (var url in _client!.UploadFilesAsync(uploadRequest))
+        {
+            uploadedUrl = url;
+            break;
+        }
+        TrackUploadedFile(uploadedUrl);
+        var fileName = uploadedUrl!.ToCatboxImageName()!;
+
+        var tempDir = Path.Combine(Path.GetTempPath(), $"catbox-test-{Guid.NewGuid():N}");
+        try
+        {
+            // Act
+            await _client.DownloadFileAsync(fileName, tempDir);
+
+            // Assert
+            var downloadedFile = Path.Combine(tempDir, fileName);
+            File.Exists(downloadedFile).ShouldBeTrue($"Downloaded file not found: {downloadedFile}");
+            new FileInfo(downloadedFile).Length.ShouldBeGreaterThan(0);
+            await TestContext.Out.WriteLineAsync($"Downloaded file: {downloadedFile} ({new FileInfo(downloadedFile).Length} bytes)");
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Test]
+    [Order(9)]
+    public async Task EditAlbumAsync_WithCreatedAlbum_EditsSuccessfully()
+    {
+        // Arrange - Upload 2 files and create an album
+        var testFilePath = IntegrationTestConfig.GetTestFilePath();
+        var uploadRequest = new FileUploadRequest
+        {
+            Files = [new FileInfo(testFilePath), new FileInfo(testFilePath)],
+            UserHash = IntegrationTestConfig.UserHash
+        };
+
+        var uploadedFileNames = new List<string>();
+        await foreach (var url in _client!.UploadFilesAsync(uploadRequest))
+        {
+            TrackUploadedFile(url);
+            uploadedFileNames.Add(url!.ToCatboxImageName()!);
+        }
+        uploadedFileNames.Count.ShouldBe(2);
+
+        var createAlbumRequest = new RemoteCreateAlbumRequest
+        {
+            Title = "EditAlbum Integration Test",
+            Description = "Before edit",
+            UserHash = IntegrationTestConfig.UserHash,
+            Files = uploadedFileNames
+        };
+
+        var albumUrl = await _client.CreateAlbumAsync(createAlbumRequest);
+        TrackCreatedAlbum(albumUrl);
+        var albumId = albumUrl!.ToAlbumShortCode()!;
+
+        // Act - Edit the album with new title, description, and only 1 file
+#pragma warning disable CS0618 // EditAlbumAsync is marked Obsolete as a safety warning
+        var editResult = await _client.EditAlbumAsync(new EditAlbumRequest
+        {
+            UserHash = IntegrationTestConfig.UserHash!,
+            AlbumId = albumId,
+            Title = "Edited Title",
+            Description = "Edited description",
+            Files = [uploadedFileNames[0]]
+        });
+#pragma warning restore CS0618
+
+        // Assert
+        editResult.ShouldNotBeNullOrWhiteSpace();
+        await TestContext.Out.WriteLineAsync($"Edit result: {editResult}");
+
+        // Verify changes via GetAlbum
+        var albumInfo = await _client.GetAlbumAsync(new GetAlbumRequest { AlbumId = albumId });
+        albumInfo.Title.ShouldBe("Edited Title");
+        albumInfo.Description.ShouldBe("Edited description");
+        albumInfo.Files.Length.ShouldBe(1);
+        albumInfo.Files.ShouldContain(uploadedFileNames[0]);
+        await TestContext.Out.WriteLineAsync($"Verified album after edit: {albumInfo.Title}, {albumInfo.Files.Length} file(s)");
     }
 }

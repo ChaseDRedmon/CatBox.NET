@@ -1,5 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using CatBox.NET.Enums;
-using CatBox.NET.Requests.Album.Modify;
+using CatBox.NET.Requests.Album.Create;
 
 namespace CatBox.NET.Client;
 
@@ -38,7 +39,7 @@ internal static class Throw
     /// <param name="isValid">Whether the request type is valid</param>
     /// <param name="paramName">The name of the parameter that is invalid</param>
     /// <exception cref="ArgumentException">When the request type is invalid for the album endpoint</exception>
-    public static void IfAlbumRequestTypeInvalid(bool isValid, string paramName)
+    public static void IfAlbumRequestTypeInvalid([DoesNotReturnIf(false)] bool isValid, string paramName)
     {
         if (!isValid)
             throw new ArgumentException("Invalid Request Type for album endpoint", paramName);
@@ -58,5 +59,31 @@ internal static class Throw
         }
 
         throw new InvalidOperationException("Invalid Request Type for album endpoint");
+    }
+
+    /// <summary>
+    /// Validates an Album Creation Request
+    /// </summary>
+    /// <param name="requestBase">The album creation requestBase to validate</param>
+    /// <exception cref="ArgumentNullException">when the requestBase is null</exception>
+    /// <exception cref="ArgumentNullException">when the description is null</exception>
+    /// <exception cref="ArgumentNullException">when the title is null</exception>
+    public static void IfAlbumCreationRequestIsInvalid(AlbumCreationRequestBase requestBase)
+    {
+        ArgumentNullException.ThrowIfNull(requestBase);
+        ArgumentException.ThrowIfNullOrWhiteSpace(requestBase.Description);
+        ArgumentException.ThrowIfNullOrWhiteSpace(requestBase.Title);
+    }
+
+    /// <summary>
+    /// Throws <see cref="Exceptions.CatBoxAlbumFileLimitExceededException"/> if the file count exceeds the album limit
+    /// </summary>
+    /// <param name="fileCount">The number of files being added to the album</param>
+    /// <param name="maxFiles">The maximum allowed files (default: <see cref="Common.MaxAlbumFiles"/>)</param>
+    /// <exception cref="Exceptions.CatBoxAlbumFileLimitExceededException">When file count exceeds the maximum</exception>
+    public static void IfAlbumFileLimitExceeds(int fileCount, int maxFiles = Common.MaxAlbumFiles)
+    {
+        if (fileCount > maxFiles)
+            throw new Exceptions.CatBoxAlbumFileLimitExceededException(fileCount);
     }
 }
