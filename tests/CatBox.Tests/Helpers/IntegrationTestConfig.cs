@@ -53,6 +53,6 @@ public static class IntegrationTestConfig
     public static string GetTestFilePath()
     {
         var testDirectory = NUnit.Framework.TestContext.CurrentContext.TestDirectory;
-        return Path.Combine(testDirectory, "Images", "test-file.png");
+        return Path.Combine(testDirectory, "assets", "test-file.png");
     }
 }
